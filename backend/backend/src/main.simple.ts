@@ -33,9 +33,19 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api/docs', app, document);
 
-    // Health check endpoint
+    // Health check endpoint (Railway requirement)
     app.getHttpAdapter().get('/api/health', (req, res) => {
-      res.json({ status: 'ok', timestamp: new Date().toISOString() });
+      res.status(200).json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        memory: process.memoryUsage()
+      });
+    });
+
+    // Root health check
+    app.getHttpAdapter().get('/health', (req, res) => {
+      res.status(200).json({ status: 'ok' });
     });
 
     const port = process.env.PORT || 3001;
