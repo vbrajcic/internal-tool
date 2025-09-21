@@ -20,15 +20,29 @@ let HealthController = class HealthController {
             version: '1.0.0'
         };
     }
+    root() {
+        return {
+            message: 'Asset Management API is running',
+            status: 'healthy',
+            endpoints: ['/api/health', '/health'],
+            timestamp: new Date().toISOString()
+        };
+    }
 };
 exports.HealthController = HealthController;
+__decorate([
+    (0, common_1.Get)('health'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], HealthController.prototype, "check", null);
 __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
-], HealthController.prototype, "check", null);
+], HealthController.prototype, "root", null);
 exports.HealthController = HealthController = __decorate([
-    (0, common_1.Controller)('health')
+    (0, common_1.Controller)()
 ], HealthController);
 //# sourceMappingURL=health.controller.js.map

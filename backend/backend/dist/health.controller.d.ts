@@ -5,4 +5,10 @@ export declare class HealthController {
         service: string;
         version: string;
     };
+    root(): {
+        message: string;
+        status: string;
+        endpoints: string[];
+        timestamp: string;
+    };
 }

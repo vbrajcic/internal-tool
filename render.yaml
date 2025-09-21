@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: asset-management-backend
+    env: node
+    buildCommand: cd backend/backend && npm install && npm run build
+    startCommand: cd backend/backend && npm run start:prod
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromService:
+          type: web
+          name: asset-management-backend
+          property: port
