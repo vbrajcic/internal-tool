@@ -2,6 +2,8 @@
 
 A comprehensive web application for managing company equipment, software subscriptions, and request workflows with role-based access control.
 
+🚀 **Live Deployment**: Backend on Railway, Frontend on Vercel (configured and ready!)
+
 ## 🚀 Features
 
 - **Equipment Management**: Track company assets with QR code scanning
