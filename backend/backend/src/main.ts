@@ -9,9 +9,10 @@ import helmet from 'helmet';
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
-  const app = await NestFactory.create(AppModule, {
-    logger: ['log', 'error', 'warn', 'debug', 'verbose'],
-  });
+  try {
+    const app = await NestFactory.create(AppModule, {
+      logger: ['log', 'error', 'warn', 'debug', 'verbose'],
+    });
 
   // Security headers
   app.use(helmet({
@@ -89,13 +90,13 @@ async function bootstrap() {
 
   await app.listen(port, host);
 
-  logger.log(`🚀 Application is running on: http://${host}:${port}/api`);
-  logger.log(`📚 API Documentation: http://${host}:${port}/api/docs`);
-  logger.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.log(`🚀 Application is running on: http://${host}:${port}/api`);
+    logger.log(`📚 API Documentation: http://${host}:${port}/api/docs`);
+    logger.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  } catch (error) {
+    logger.error('Failed to start application:', error);
+    process.exit(1);
+  }
 }
 
-bootstrap().catch((error) => {
-  const logger = new Logger('Bootstrap');
-  logger.error('Failed to start application:', error);
-  process.exit(1);
-});
+bootstrap();

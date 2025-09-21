@@ -5,9 +5,8 @@
   "main": "backend/backend/dist/main.js",
   "scripts": {
     "build": "cd backend/backend && npm install && npm run build",
-    "start": "node backend/backend/dist/main.simple.js",
-    "start:prod": "node backend/backend/dist/main.simple.js",
-    "start:full": "node backend/backend/dist/main.js"
+    "start": "node backend/backend/dist/main.js",
+    "start:prod": "node backend/backend/dist/main.js"
   },
   "engines": {
     "node": ">=18.0.0",
