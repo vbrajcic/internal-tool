@@ -192,20 +192,20 @@ const EquipmentPage: React.FC = () => {
       {/* Add Equipment Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Equipment</h3>
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg max-w-lg w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4">Add New Equipment</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Equipment Name</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Dell Laptop" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Equipment Name</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" placeholder="e.g., Dell Laptop" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Serial Number</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., DL12345" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Serial Number</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" placeholder="e.g., DL12345" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Type</label>
+                <select className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100">
                   <option>Laptop</option>
                   <option>Desktop</option>
                   <option>Monitor</option>
@@ -215,16 +215,16 @@ const EquipmentPage: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Dell" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Brand</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" placeholder="e.g., Dell" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Model</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., XPS 13" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Model</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" placeholder="e.g., XPS 13" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Purchase Date</label>
-                <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Purchase Date</label>
+                <input type="date" className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" />
               </div>
             </div>
             <div className="flex space-x-3 mt-6">
@@ -239,7 +239,7 @@ const EquipmentPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setShowAddModal(false)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                className="flex-1 bg-gray-300 dark:bg-slate-600 text-gray-700 dark:text-slate-200 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500 transition-colors"
               >
                 Cancel
               </button>
@@ -251,12 +251,12 @@ const EquipmentPage: React.FC = () => {
       {/* View Equipment Modal */}
       {showViewModal && selectedEquipment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg max-w-lg w-full mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Equipment Details</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100">Equipment Details</h3>
               <button
                 onClick={() => setShowViewModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-300"
               >
                 ✕
               </button>
@@ -264,27 +264,27 @@ const EquipmentPage: React.FC = () => {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
-                  <div className="mt-1 text-sm text-gray-900">{selectedEquipment.name}</div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Name</label>
+                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{selectedEquipment.name}</div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Serial Number</label>
-                  <div className="mt-1 text-sm text-gray-900">{selectedEquipment.serialNumber}</div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Serial Number</label>
+                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{selectedEquipment.serialNumber}</div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Type</label>
-                  <div className="mt-1 text-sm text-gray-900">{selectedEquipment.type}</div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Type</label>
+                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{selectedEquipment.type}</div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Brand</label>
-                  <div className="mt-1 text-sm text-gray-900">{selectedEquipment.brand}</div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Brand</label>
+                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{selectedEquipment.brand}</div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Model</label>
-                  <div className="mt-1 text-sm text-gray-900">{selectedEquipment.model}</div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Model</label>
+                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{selectedEquipment.model}</div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Status</label>
                   <div className="mt-1">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedEquipment.status)}`}>
                       {selectedEquipment.status}
@@ -292,15 +292,15 @@ const EquipmentPage: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Purchase Date</label>
-                  <div className="mt-1 text-sm text-gray-900">{new Date(selectedEquipment.purchaseDate).toLocaleDateString()}</div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Purchase Date</label>
+                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{new Date(selectedEquipment.purchaseDate).toLocaleDateString()}</div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Assigned To</label>
-                  <div className="mt-1 text-sm text-gray-900">{selectedEquipment.assignedTo || 'Not assigned'}</div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Assigned To</label>
+                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{selectedEquipment.assignedTo || 'Not assigned'}</div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">QR Code</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">QR Code</label>
                   <div className="mt-1 text-sm text-gray-900 font-mono">{selectedEquipment.qrCode}</div>
                 </div>
               </div>
@@ -308,7 +308,7 @@ const EquipmentPage: React.FC = () => {
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setShowViewModal(false)}
-                className="bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                className="bg-gray-300 dark:bg-slate-600 text-gray-700 dark:text-slate-200 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500 transition-colors"
               >
                 Close
               </button>
@@ -320,19 +320,19 @@ const EquipmentPage: React.FC = () => {
       {/* Edit Equipment Modal */}
       {showEditModal && selectedEquipment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Edit Equipment</h3>
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg max-w-lg w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4">Edit Equipment</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Equipment Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Equipment Name</label>
                 <input type="text" defaultValue={selectedEquipment.name} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Serial Number</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Serial Number</label>
                 <input type="text" defaultValue={selectedEquipment.serialNumber} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Type</label>
                 <select defaultValue={selectedEquipment.type} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option>Laptop</option>
                   <option>Desktop</option>
@@ -343,15 +343,15 @@ const EquipmentPage: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Brand</label>
                 <input type="text" defaultValue={selectedEquipment.brand} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Model</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Model</label>
                 <input type="text" defaultValue={selectedEquipment.model} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Status</label>
                 <select defaultValue={selectedEquipment.status} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="Available">Available</option>
                   <option value="Assigned">Assigned</option>
@@ -360,11 +360,11 @@ const EquipmentPage: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Purchase Date</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Purchase Date</label>
                 <input type="date" defaultValue={selectedEquipment.purchaseDate} className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Assigned To</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Assigned To</label>
                 <input type="text" defaultValue={selectedEquipment.assignedTo || ''} placeholder="Employee name" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
             </div>
@@ -380,7 +380,7 @@ const EquipmentPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setShowEditModal(false)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                className="flex-1 bg-gray-300 dark:bg-slate-600 text-gray-700 dark:text-slate-200 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500 transition-colors"
               >
                 Cancel
               </button>
@@ -392,27 +392,27 @@ const EquipmentPage: React.FC = () => {
       {/* Transfer Equipment Modal */}
       {showTransferModal && selectedEquipment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg max-w-lg w-full mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Transfer Equipment</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100">Transfer Equipment</h3>
               <button
                 onClick={() => setShowTransferModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-300"
               >
                 ✕
               </button>
             </div>
 
-            <div className="mb-4 p-4 bg-gray-50 rounded-md">
-              <div className="text-sm font-medium text-gray-900">{selectedEquipment.name}</div>
-              <div className="text-sm text-gray-500">Serial: {selectedEquipment.serialNumber}</div>
-              <div className="text-sm text-gray-500">Currently assigned to: {selectedEquipment.assignedTo || 'Unassigned'}</div>
+            <div className="mb-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-md">
+              <div className="text-sm font-medium text-gray-900 dark:text-slate-100">{selectedEquipment.name}</div>
+              <div className="text-sm text-gray-500 dark:text-slate-400">Serial: {selectedEquipment.serialNumber}</div>
+              <div className="text-sm text-gray-500 dark:text-slate-400">Currently assigned to: {selectedEquipment.assignedTo || 'Unassigned'}</div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Transfer to User</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Transfer to User</label>
+                <select className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100">
                   <option value="">Select a user...</option>
                   {availableUsers
                     .filter(u => u.name !== selectedEquipment.assignedTo)
@@ -425,16 +425,16 @@ const EquipmentPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Transfer Reason</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Transfer Reason</label>
                 <textarea
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
                   placeholder="Please provide a reason for this transfer..."
                 />
               </div>
 
-              <div className="bg-blue-50 p-3 rounded-md">
-                <div className="text-sm text-blue-800">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
+                <div className="text-sm text-blue-800 dark:text-blue-200">
                   <strong>Transfer Process:</strong>
                   <ul className="mt-1 ml-4 list-disc text-xs">
                     <li>Current user will be notified and must confirm the transfer</li>
@@ -457,7 +457,7 @@ const EquipmentPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setShowTransferModal(false)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                className="flex-1 bg-gray-300 dark:bg-slate-600 text-gray-700 dark:text-slate-200 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500 transition-colors"
               >
                 Cancel
               </button>
@@ -469,20 +469,20 @@ const EquipmentPage: React.FC = () => {
       {/* Condition Report Modal */}
       {showConditionModal && selectedEquipment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg max-w-lg w-full mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">Report Equipment Condition</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100">Report Equipment Condition</h3>
               <button
                 onClick={() => setShowConditionModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-300"
               >
                 ✕
               </button>
             </div>
 
-            <div className="mb-4 p-4 bg-gray-50 rounded-md">
-              <div className="text-sm font-medium text-gray-900">{selectedEquipment.name}</div>
-              <div className="text-sm text-gray-500">Serial: {selectedEquipment.serialNumber}</div>
+            <div className="mb-4 p-4 bg-gray-50 dark:bg-slate-700 rounded-md">
+              <div className="text-sm font-medium text-gray-900 dark:text-slate-100">{selectedEquipment.name}</div>
+              <div className="text-sm text-gray-500 dark:text-slate-400">Serial: {selectedEquipment.serialNumber}</div>
               <div className="flex items-center mt-2">
                 <span className="text-sm text-gray-500 mr-2">Current Condition:</span>
                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -501,8 +501,8 @@ const EquipmentPage: React.FC = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Update Condition</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Update Condition</label>
+                <select className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100">
                   <option value="New">New</option>
                   <option value="Good">Good</option>
                   <option value="Fair">Fair</option>
@@ -511,8 +511,8 @@ const EquipmentPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Issue Type</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Issue Type</label>
+                <select className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100">
                   <option value="">Select issue type...</option>
                   <option value="Hardware">Hardware Issue</option>
                   <option value="Software">Software Issue</option>
@@ -523,16 +523,16 @@ const EquipmentPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Description</label>
                 <textarea
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
                   placeholder="Please describe the issue or condition change in detail..."
                 />
               </div>
 
-              <div className="bg-amber-50 p-3 rounded-md">
-                <div className="text-sm text-amber-800">
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-md">
+                <div className="text-sm text-amber-800 dark:text-amber-200">
                   <strong>Note:</strong> This report will be sent to IT support and your manager.
                   For urgent issues, please contact IT support directly.
                 </div>
@@ -551,7 +551,7 @@ const EquipmentPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setShowConditionModal(false)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                className="flex-1 bg-gray-300 dark:bg-slate-600 text-gray-700 dark:text-slate-200 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500 transition-colors"
               >
                 Cancel
               </button>
@@ -563,8 +563,8 @@ const EquipmentPage: React.FC = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-light text-gray-900">Equipment Management</h1>
-            <p className="text-gray-600">Manage and track all company equipment</p>
+            <h1 className="text-2xl font-light text-gray-900 dark:text-slate-100">Equipment Management</h1>
+            <p className="text-gray-600 dark:text-slate-400">Manage and track all company equipment</p>
           </div>
           {user?.role === 'admin' && (
             <button
@@ -577,7 +577,7 @@ const EquipmentPage: React.FC = () => {
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
             <div className="flex-1">
               <input
@@ -585,7 +585,7 @@ const EquipmentPage: React.FC = () => {
                 placeholder="Search equipment by name, serial number, or brand..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
               />
             </div>
             <div>
@@ -605,33 +605,33 @@ const EquipmentPage: React.FC = () => {
         </div>
 
         {/* Equipment List */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-50 dark:bg-slate-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equipment</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Serial Number</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Condition</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned To</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Equipment</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Serial Number</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Condition</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Assigned To</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
                 {filteredEquipment.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
+                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-slate-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{item.name}</div>
-                        <div className="text-sm text-gray-500">{item.brand} {item.model}</div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-slate-100">{item.name}</div>
+                        <div className="text-sm text-gray-500 dark:text-slate-400">{item.brand} {item.model}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-slate-100">
                       {item.serialNumber}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-slate-100">
                       {item.type}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -644,7 +644,7 @@ const EquipmentPage: React.FC = () => {
                         {item.condition}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-slate-100">
                       {item.assignedTo || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -705,8 +705,8 @@ const EquipmentPage: React.FC = () => {
         {filteredEquipment.length === 0 && (
           <div className="text-center py-12">
             <div className="text-gray-400 text-xl mb-2">📦</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No equipment found</h3>
-            <p className="text-gray-500">Try adjusting your search or filter criteria</p>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">No equipment found</h3>
+            <p className="text-gray-500 dark:text-slate-400">Try adjusting your search or filter criteria</p>
           </div>
         )}
       </div>

@@ -28,19 +28,19 @@ const SimpleDashboard: React.FC = () => {
       {showAddEquipment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Equipment</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4">Add New Equipment</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Equipment Name</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Dell Laptop" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Equipment Name</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" placeholder="e.g., Dell Laptop" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Serial Number</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., DL12345" />
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Serial Number</label>
+                <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" placeholder="e.g., DL12345" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Type</label>
+                <select className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100">
                   <option>Laptop</option>
                   <option>Desktop</option>
                   <option>Monitor</option>
@@ -61,7 +61,7 @@ const SimpleDashboard: React.FC = () => {
               </button>
               <button
                 onClick={() => setShowAddEquipment(false)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                className="flex-1 bg-gray-300 dark:bg-slate-600 text-gray-700 dark:text-slate-200 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500 transition-colors"
               >
                 Cancel
               </button>
@@ -75,10 +75,10 @@ const SimpleDashboard: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">QR Code Scanner</h3>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100">QR Code Scanner</h3>
               <button
                 onClick={() => setShowQRScanner(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-300"
               >
                 ✕
               </button>
@@ -106,7 +106,7 @@ const SimpleDashboard: React.FC = () => {
             <div className="mt-4 text-center">
               <button
                 onClick={() => setShowQRScanner(false)}
-                className="bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                className="bg-gray-300 dark:bg-slate-600 text-gray-700 dark:text-slate-200 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500 transition-colors"
               >
                 Close Scanner
               </button>
@@ -119,11 +119,11 @@ const SimpleDashboard: React.FC = () => {
       {showCreateRequest && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Create Equipment Request</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4">Create Equipment Request</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Equipment Type</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Equipment Type</label>
+                <select className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100">
                   <option>Laptop</option>
                   <option>Desktop</option>
                   <option>Monitor</option>
@@ -133,12 +133,12 @@ const SimpleDashboard: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Justification</label>
-                <textarea className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} placeholder="Explain why you need this equipment..."></textarea>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Justification</label>
+                <textarea className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" rows={3} placeholder="Explain why you need this equipment..."></textarea>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Priority</label>
+                <select className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100">
                   <option>Low</option>
                   <option>Medium</option>
                   <option>High</option>
@@ -158,7 +158,7 @@ const SimpleDashboard: React.FC = () => {
               </button>
               <button
                 onClick={() => setShowCreateRequest(false)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
+                className="flex-1 bg-gray-300 dark:bg-slate-600 text-gray-700 dark:text-slate-200 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500 transition-colors"
               >
                 Cancel
               </button>
@@ -172,21 +172,21 @@ const SimpleDashboard: React.FC = () => {
         <h1 className="text-2xl font-light text-gray-900 dark:text-white mb-2">
           Welcome back, {user?.name}
         </h1>
-        <p className="text-gray-600 dark:text-dark-400">
+        <p className="text-gray-600 dark:text-slate-400">
           Here's an overview of your asset management dashboard
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
-          <div key={index} className="bg-white dark:bg-dark-800 p-6 rounded-lg border border-gray-200 dark:border-dark-700 shadow-sm">
+          <div key={index} className="bg-white dark:bg-slate-800 p-6 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm">
             <div className="text-3xl font-light text-gray-900 dark:text-white mb-1">
               {stat.value}
             </div>
             <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
               {stat.label}
             </div>
-            <div className="text-xs text-gray-500 dark:text-dark-400">
+            <div className="text-xs text-gray-500 dark:text-slate-400">
               {stat.change}
             </div>
           </div>
@@ -194,7 +194,7 @@ const SimpleDashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white dark:bg-dark-800 p-6 rounded-lg border border-gray-200 dark:border-dark-700 shadow-sm">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm">
           <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Recent Activity
           </h2>
@@ -203,10 +203,10 @@ const SimpleDashboard: React.FC = () => {
               <div key={index} className="flex items-start space-x-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm text-gray-900 dark:text-slate-100">
                     <span className="font-medium">{activity.action}:</span> {activity.item}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                     {activity.user} • {activity.time}
                   </p>
                 </div>
@@ -215,39 +215,39 @@ const SimpleDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm">
+          <h2 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4">
             Quick Actions
           </h2>
           <div className="space-y-3">
             <button
               onClick={() => setShowAddEquipment(true)}
-              className="w-full text-left p-3 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors"
+              className="w-full text-left p-3 rounded-md border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
             >
-              <div className="font-medium text-gray-900">Add New Equipment</div>
-              <div className="text-sm text-gray-500">Register a new asset</div>
+              <div className="font-medium text-gray-900 dark:text-slate-100">Add New Equipment</div>
+              <div className="text-sm text-gray-500 dark:text-slate-400">Register a new asset</div>
             </button>
             <button
               onClick={() => setShowQRScanner(true)}
-              className="w-full text-left p-3 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors"
+              className="w-full text-left p-3 rounded-md border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
             >
-              <div className="font-medium text-gray-900">Scan QR Code</div>
-              <div className="text-sm text-gray-500">Quick asset lookup</div>
+              <div className="font-medium text-gray-900 dark:text-slate-100">Scan QR Code</div>
+              <div className="text-sm text-gray-500 dark:text-slate-400">Quick asset lookup</div>
             </button>
             <button
               onClick={() => setShowCreateRequest(true)}
-              className="w-full text-left p-3 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors"
+              className="w-full text-left p-3 rounded-md border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
             >
-              <div className="font-medium text-gray-900">Create Request</div>
-              <div className="text-sm text-gray-500">Request new equipment</div>
+              <div className="font-medium text-gray-900 dark:text-slate-100">Create Request</div>
+              <div className="text-sm text-gray-500 dark:text-slate-400">Request new equipment</div>
             </button>
             {user?.role === 'admin' && (
               <button
                 onClick={() => alert('User management features coming soon!')}
-                className="w-full text-left p-3 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors"
+                className="w-full text-left p-3 rounded-md border border-gray-200 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
               >
-                <div className="font-medium text-gray-900">Manage Users</div>
-                <div className="text-sm text-gray-500">User administration</div>
+                <div className="font-medium text-gray-900 dark:text-slate-100">Manage Users</div>
+                <div className="text-sm text-gray-500 dark:text-slate-400">User administration</div>
               </button>
             )}
           </div>
