@@ -1,0 +1,386 @@
+openapi: 3.0.3
+info:
+  title: Subscription Management API
+  description: API for managing software subscriptions and invoices
+  version: 1.0.0
+
+paths:
+  /api/subscriptions:
+    get:
+      summary: List subscriptions
+      description: Get subscriptions with filtering and pagination
+      parameters:
+        - name: ownerId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+        - name: paymentMethod
+          in: query
+          schema:
+            type: string
+            enum: [CompanyCard, PersonalReimbursed]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Subscriptions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscriptions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subscription'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Register new subscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionRequest'
+      responses:
+        '201':
+          description: Subscription registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Invalid request data
+
+  /api/subscriptions/{id}:
+    get:
+      summary: Get subscription details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Subscription details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDetails'
+        '404':
+          description: Subscription not found
+
+    put:
+      summary: Update subscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionRequest'
+      responses:
+        '200':
+          description: Subscription updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '404':
+          description: Subscription not found
+
+  /api/subscriptions/{id}/invoices:
+    get:
+      summary: Get subscription invoices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Invoices retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invoice'
+
+    post:
+      summary: Upload invoice for subscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                amount:
+                  type: number
+                  format: decimal
+                invoiceDate:
+                  type: string
+                  format: date
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Invoice uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        '400':
+          description: Invalid file or data
+
+  /api/subscriptions/export:
+    get:
+      summary: Export subscriptions for accounting
+      parameters:
+        - name: format
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [csv, excel, pdf]
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: paymentMethod
+          in: query
+          schema:
+            type: string
+            enum: [CompanyCard, PersonalReimbursed]
+      responses:
+        '200':
+          description: Export file generated
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+components:
+  schemas:
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        price:
+          type: number
+          format: decimal
+        billingFrequency:
+          type: string
+          enum: [Monthly, Yearly]
+        paymentMethod:
+          type: string
+          enum: [CompanyCard, PersonalReimbursed]
+        ownerId:
+          type: string
+          format: uuid
+        ownerEmail:
+          type: string
+          format: email
+        renewalDate:
+          type: string
+          format: date
+          nullable: true
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    SubscriptionDetails:
+      allOf:
+        - $ref: '#/components/schemas/Subscription'
+        - type: object
+          properties:
+            owner:
+              $ref: '#/components/schemas/UserSummary'
+            invoices:
+              type: array
+              items:
+                $ref: '#/components/schemas/Invoice'
+            totalPaid:
+              type: number
+              format: decimal
+            lastInvoiceDate:
+              type: string
+              format: date
+              nullable: true
+
+    CreateSubscriptionRequest:
+      type: object
+      required:
+        - name
+        - price
+        - billingFrequency
+        - paymentMethod
+        - ownerId
+        - ownerEmail
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+          format: decimal
+          minimum: 0
+        billingFrequency:
+          type: string
+          enum: [Monthly, Yearly]
+        paymentMethod:
+          type: string
+          enum: [CompanyCard, PersonalReimbursed]
+        ownerId:
+          type: string
+          format: uuid
+        ownerEmail:
+          type: string
+          format: email
+        renewalDate:
+          type: string
+          format: date
+
+    UpdateSubscriptionRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+          format: decimal
+          minimum: 0
+        billingFrequency:
+          type: string
+          enum: [Monthly, Yearly]
+        paymentMethod:
+          type: string
+          enum: [CompanyCard, PersonalReimbursed]
+        renewalDate:
+          type: string
+          format: date
+        isActive:
+          type: boolean
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        subscriptionId:
+          type: string
+          format: uuid
+        fileName:
+          type: string
+        filePath:
+          type: string
+        uploadedById:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          format: decimal
+          nullable: true
+        invoiceDate:
+          type: string
+          format: date
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        isVerified:
+          type: boolean
+        verifiedById:
+          type: string
+          format: uuid
+          nullable: true
+        uploadedAt:
+          type: string
+          format: date-time
+        verifiedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [Employee, TeamLead, Admin]
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        pages:
+          type: integer

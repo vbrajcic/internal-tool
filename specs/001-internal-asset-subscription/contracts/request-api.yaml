@@ -1,0 +1,392 @@
+openapi: 3.0.3
+info:
+  title: Request & Approval API
+  description: API for equipment request and approval workflows
+  version: 1.0.0
+
+paths:
+  /api/requests:
+    get:
+      summary: List requests
+      description: Get requests with filtering based on user role
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Submitted, TeamLeadReview, AdminReview, Approved, Rejected, Ordered, Fulfilled]
+        - name: requesterId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: teamLeadId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Requests retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  requests:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Request'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Submit equipment request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRequestRequest'
+      responses:
+        '201':
+          description: Request submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+        '400':
+          description: Invalid request data
+
+  /api/requests/{id}:
+    get:
+      summary: Get request details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Request details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestDetails'
+        '404':
+          description: Request not found
+
+    put:
+      summary: Update request (for amendments before approval)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRequestRequest'
+      responses:
+        '200':
+          description: Request updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+        '400':
+          description: Request cannot be modified in current status
+        '404':
+          description: Request not found
+
+  /api/requests/{id}/team-lead-review:
+    post:
+      summary: Team lead approval/rejection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamLeadReviewRequest'
+      responses:
+        '200':
+          description: Team lead review submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+        '403':
+          description: Not authorized to review this request
+        '404':
+          description: Request not found
+
+  /api/requests/{id}/admin-review:
+    post:
+      summary: Admin final approval/rejection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminReviewRequest'
+      responses:
+        '200':
+          description: Admin review submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+        '403':
+          description: Not authorized for admin review
+        '404':
+          description: Request not found
+
+  /api/requests/{id}/fulfill:
+    post:
+      summary: Mark request as fulfilled with equipment assignment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FulfillmentRequest'
+      responses:
+        '200':
+          description: Request fulfilled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Request'
+        '400':
+          description: Equipment already assigned or request not approved
+        '404':
+          description: Request not found
+
+components:
+  schemas:
+    Request:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        requesterId:
+          type: string
+          format: uuid
+        equipmentType:
+          type: string
+          enum: [Laptop, Display, Phone, Tablet, Dongle, Keyboard, Mouse, Furniture]
+        justification:
+          type: string
+        specifications:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [Submitted, TeamLeadReview, AdminReview, Approved, Rejected, Ordered, Fulfilled]
+        teamLeadId:
+          type: string
+          format: uuid
+        teamLeadDecision:
+          type: string
+          enum: [Approved, Rejected, Pending]
+        teamLeadNotes:
+          type: string
+          nullable: true
+        adminId:
+          type: string
+          format: uuid
+          nullable: true
+        adminDecision:
+          type: string
+          enum: [Approved, Rejected, Pending]
+          nullable: true
+        adminNotes:
+          type: string
+          nullable: true
+        rejectionReason:
+          type: string
+          nullable: true
+        requestedAt:
+          type: string
+          format: date-time
+        teamLeadReviewedAt:
+          type: string
+          format: date-time
+          nullable: true
+        adminReviewedAt:
+          type: string
+          format: date-time
+          nullable: true
+        fulfilledAt:
+          type: string
+          format: date-time
+          nullable: true
+        equipmentId:
+          type: string
+          format: uuid
+          nullable: true
+
+    RequestDetails:
+      allOf:
+        - $ref: '#/components/schemas/Request'
+        - type: object
+          properties:
+            requester:
+              $ref: '#/components/schemas/UserSummary'
+            teamLead:
+              $ref: '#/components/schemas/UserSummary'
+            admin:
+              allOf:
+                - $ref: '#/components/schemas/UserSummary'
+                - type: object
+                  nullable: true
+            assignedEquipment:
+              allOf:
+                - $ref: '#/components/schemas/EquipmentSummary'
+                - type: object
+                  nullable: true
+
+    CreateRequestRequest:
+      type: object
+      required:
+        - equipmentType
+        - justification
+      properties:
+        equipmentType:
+          type: string
+          enum: [Laptop, Display, Phone, Tablet, Dongle, Keyboard, Mouse, Furniture]
+        justification:
+          type: string
+          minLength: 10
+        specifications:
+          type: string
+
+    UpdateRequestRequest:
+      type: object
+      properties:
+        justification:
+          type: string
+          minLength: 10
+        specifications:
+          type: string
+
+    TeamLeadReviewRequest:
+      type: object
+      required:
+        - decision
+      properties:
+        decision:
+          type: string
+          enum: [Approved, Rejected]
+        notes:
+          type: string
+        rejectionReason:
+          type: string
+          description: Required if decision is Rejected
+
+    AdminReviewRequest:
+      type: object
+      required:
+        - decision
+      properties:
+        decision:
+          type: string
+          enum: [Approved, Rejected]
+        notes:
+          type: string
+        rejectionReason:
+          type: string
+          description: Required if decision is Rejected
+
+    FulfillmentRequest:
+      type: object
+      required:
+        - equipmentId
+      properties:
+        equipmentId:
+          type: string
+          format: uuid
+        notes:
+          type: string
+
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [Employee, TeamLead, Admin]
+
+    EquipmentSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        serialNumber:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+        type:
+          type: string
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        pages:
+          type: integer

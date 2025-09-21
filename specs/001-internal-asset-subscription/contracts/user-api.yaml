@@ -1,0 +1,433 @@
+openapi: 3.0.3
+info:
+  title: User Management API
+  description: API for user and team management with role-based access
+  version: 1.0.0
+
+paths:
+  /api/users:
+    get:
+      summary: List users
+      description: Get users with filtering and role-based visibility
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [Employee, TeamLead, Admin]
+        - name: teamId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Invite new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User invitation sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid request data
+        '409':
+          description: Email already exists
+
+  /api/users/{id}:
+    get:
+      summary: Get user details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+        '404':
+          description: User not found
+
+    put:
+      summary: Update user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+
+  /api/users/{id}/deactivate:
+    post:
+      summary: Deactivate user (preserve audit trail)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                transferEquipmentTo:
+                  type: string
+                  format: uuid
+                  nullable: true
+      responses:
+        '200':
+          description: User deactivated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+
+  /api/teams:
+    get:
+      summary: List teams
+      responses:
+        '200':
+          description: Teams retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+
+    post:
+      summary: Create team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTeamRequest'
+      responses:
+        '201':
+          description: Team created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+  /api/teams/{id}:
+    get:
+      summary: Get team details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Team details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamDetails'
+        '404':
+          description: Team not found
+
+    put:
+      summary: Update team
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTeamRequest'
+      responses:
+        '200':
+          description: Team updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [Employee, TeamLead, Admin]
+        teamId:
+          type: string
+          format: uuid
+          nullable: true
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserDetails:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            team:
+              allOf:
+                - $ref: '#/components/schemas/Team'
+                - type: object
+                  nullable: true
+            assignedEquipment:
+              type: array
+              items:
+                $ref: '#/components/schemas/EquipmentSummary'
+            activeSubscriptions:
+              type: array
+              items:
+                $ref: '#/components/schemas/SubscriptionSummary'
+            pendingRequests:
+              type: array
+              items:
+                $ref: '#/components/schemas/RequestSummary'
+
+    CreateUserRequest:
+      type: object
+      required:
+        - email
+        - firstName
+        - lastName
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [Employee, TeamLead, Admin]
+        teamId:
+          type: string
+          format: uuid
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [Employee, TeamLead, Admin]
+        teamId:
+          type: string
+          format: uuid
+
+    Team:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        leadId:
+          type: string
+          format: uuid
+        description:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    TeamDetails:
+      allOf:
+        - $ref: '#/components/schemas/Team'
+        - type: object
+          properties:
+            lead:
+              $ref: '#/components/schemas/User'
+            members:
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+            teamEquipment:
+              type: array
+              items:
+                $ref: '#/components/schemas/EquipmentSummary'
+
+    CreateTeamRequest:
+      type: object
+      required:
+        - name
+        - leadId
+      properties:
+        name:
+          type: string
+        leadId:
+          type: string
+          format: uuid
+        description:
+          type: string
+
+    UpdateTeamRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        leadId:
+          type: string
+          format: uuid
+        description:
+          type: string
+
+    EquipmentSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        serialNumber:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+
+    SubscriptionSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        price:
+          type: number
+          format: decimal
+        billingFrequency:
+          type: string
+        renewalDate:
+          type: string
+          format: date
+
+    RequestSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        equipmentType:
+          type: string
+        status:
+          type: string
+        requestedAt:
+          type: string
+          format: date-time
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        pages:
+          type: integer

@@ -47,7 +47,30 @@
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+### I. Specification-First Development
+- [ ] Feature has complete specification before planning begins
+- [ ] User scenarios, functional requirements, and acceptance criteria defined
+- [ ] No implementation details in specification
+
+### II. Test-Driven Development Readiness
+- [ ] Plan includes contract test generation before implementation
+- [ ] Integration test scenarios identified from user stories
+- [ ] TDD workflow clearly defined in task ordering
+
+### III. Documentation-Driven Design
+- [ ] Data models, API contracts planned for documentation
+- [ ] Architectural decisions will be documented
+- [ ] Design documentation precedes implementation
+
+### IV. Constitutional Compliance
+- [ ] Plan adheres to all constitutional principles
+- [ ] Any complexity deviations documented with justification
+- [ ] No violations of non-negotiable principles
+
+### V. Incremental Delivery
+- [ ] Feature broken into small, testable components
+- [ ] Each component delivers measurable user value
+- [ ] Parallel development opportunities identified
 
 ## Project Structure
 
@@ -208,4 +231,4 @@ ios/ or android/
 - [ ] Complexity deviations documented
 
 ---
-*Based on Constitution v2.1.1 - See `/memory/constitution.md`*
+*Based on Constitution v1.0.0 - See `.specify/memory/constitution.md`*

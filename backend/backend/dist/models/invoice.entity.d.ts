@@ -1,0 +1,32 @@
+import { Subscription } from './subscription.entity';
+import { User } from './user.entity';
+export declare class Invoice {
+    id: string;
+    subscriptionId: string;
+    fileName: string;
+    filePath: string;
+    uploadedById: string;
+    amount: number;
+    invoiceDate: Date;
+    description: string;
+    isVerified: boolean;
+    verifiedById: string;
+    uploadedAt: Date;
+    verifiedAt: Date;
+    subscription: Subscription;
+    uploadedBy: User;
+    verifiedBy: User;
+    get fileExtension(): string;
+    get isPdf(): boolean;
+    get isRecentUpload(): boolean;
+    get needsVerification(): boolean;
+    get monthYear(): string;
+    get isCurrentMonth(): boolean;
+    get isOverdue(): boolean;
+    verify(verifiedById: string, amount?: number, invoiceDate?: Date): void;
+    unverify(): void;
+    updateAmount(amount: number): void;
+    updateInvoiceDate(date: Date): void;
+    static validateFileName(fileName: string): boolean;
+    static generateS3Key(subscriptionId: string, fileName: string): string;
+}

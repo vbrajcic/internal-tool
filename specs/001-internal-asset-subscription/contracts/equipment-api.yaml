@@ -1,0 +1,347 @@
+openapi: 3.0.3
+info:
+  title: Equipment Management API
+  description: API for managing company equipment assets
+  version: 1.0.0
+
+paths:
+  /api/equipment:
+    get:
+      summary: List equipment
+      description: Get equipment list with filtering and pagination
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Available, Assigned, Pending, Broken, Stolen]
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [Laptop, Display, Phone, Tablet, Dongle, Keyboard, Mouse, Furniture]
+        - name: ownerId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Equipment list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  equipment:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Equipment'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      summary: Register new equipment
+      description: Create new equipment record with QR code generation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEquipmentRequest'
+      responses:
+        '201':
+          description: Equipment registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '400':
+          description: Invalid request data
+        '409':
+          description: Serial number already exists
+
+  /api/equipment/{id}:
+    get:
+      summary: Get equipment details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Equipment details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentDetails'
+        '404':
+          description: Equipment not found
+
+    put:
+      summary: Update equipment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEquipmentRequest'
+      responses:
+        '200':
+          description: Equipment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Equipment'
+        '404':
+          description: Equipment not found
+
+  /api/equipment/{id}/transfer:
+    post:
+      summary: Transfer equipment ownership
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '201':
+          description: Transfer initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transfer'
+        '400':
+          description: Invalid transfer request
+        '404':
+          description: Equipment not found
+
+  /api/equipment/qr/{qrCode}:
+    get:
+      summary: Get equipment by QR code
+      parameters:
+        - name: qrCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Equipment found by QR code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentDetails'
+        '404':
+          description: QR code not found
+
+components:
+  schemas:
+    Equipment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        serialNumber:
+          type: string
+        qrCode:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+        type:
+          type: string
+          enum: [Laptop, Display, Phone, Tablet, Dongle, Keyboard, Mouse, Furniture]
+        status:
+          type: string
+          enum: [Available, Assigned, Pending, Broken, Stolen]
+        purchaseDate:
+          type: string
+          format: date
+        classificationTag:
+          type: string
+          enum: [Profico, ZOPI, Leasing]
+        currentOwnerId:
+          type: string
+          format: uuid
+          nullable: true
+        condition:
+          type: string
+          enum: [New, Good, Fair, Poor]
+        notes:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    EquipmentDetails:
+      allOf:
+        - $ref: '#/components/schemas/Equipment'
+        - type: object
+          properties:
+            currentOwner:
+              $ref: '#/components/schemas/UserSummary'
+            transferHistory:
+              type: array
+              items:
+                $ref: '#/components/schemas/Transfer'
+
+    CreateEquipmentRequest:
+      type: object
+      required:
+        - serialNumber
+        - brand
+        - model
+        - type
+        - purchaseDate
+        - classificationTag
+      properties:
+        serialNumber:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+        type:
+          type: string
+          enum: [Laptop, Display, Phone, Tablet, Dongle, Keyboard, Mouse, Furniture]
+        purchaseDate:
+          type: string
+          format: date
+        classificationTag:
+          type: string
+          enum: [Profico, ZOPI, Leasing]
+        condition:
+          type: string
+          enum: [New, Good, Fair, Poor]
+          default: New
+        notes:
+          type: string
+
+    UpdateEquipmentRequest:
+      type: object
+      properties:
+        brand:
+          type: string
+        model:
+          type: string
+        status:
+          type: string
+          enum: [Available, Assigned, Pending, Broken, Stolen]
+        condition:
+          type: string
+          enum: [New, Good, Fair, Poor]
+        notes:
+          type: string
+
+    TransferRequest:
+      type: object
+      required:
+        - toUserId
+        - reason
+      properties:
+        toUserId:
+          type: string
+          format: uuid
+          nullable: true
+        reason:
+          type: string
+
+    Transfer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        equipmentId:
+          type: string
+          format: uuid
+        fromUserId:
+          type: string
+          format: uuid
+          nullable: true
+        toUserId:
+          type: string
+          format: uuid
+          nullable: true
+        transferType:
+          type: string
+          enum: [Assignment, Return, Transfer, Decommission]
+        reason:
+          type: string
+        fromUserConfirmed:
+          type: boolean
+        toUserConfirmed:
+          type: boolean
+        adminConfirmed:
+          type: boolean
+        transferredAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        role:
+          type: string
+          enum: [Employee, TeamLead, Admin]
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        pages:
+          type: integer
