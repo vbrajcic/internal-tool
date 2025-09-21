@@ -659,6 +659,48 @@ export class EquipmentService {
   }
 
   /**
+   * Find equipment by QR code (alias for findByQR)
+   */
+  async findByQRCode(qrCode: string, currentUser: User): Promise<EquipmentWithMobileOptimization> {
+    return this.findByQR(qrCode, currentUser);
+  }
+
+  /**
+   * Log successful QR scan
+   */
+  async logQRScan(equipmentId: string, userId: string, responseTime: number): Promise<void> {
+    await this.createAuditLog(
+      'equipment_qr_scan',
+      equipmentId,
+      userId,
+      AuditAction.CREATE,
+      {},
+      { responseTime, scanTime: new Date().toISOString() }
+    );
+  }
+
+  /**
+   * Log failed QR scan
+   */
+  async logQRScanFailure(qrCode: string, userId: string, responseTime: number, errorMessage: string): Promise<void> {
+    await this.createAuditLog(
+      'equipment_qr_scan_failure',
+      qrCode,
+      userId,
+      AuditAction.CREATE,
+      {},
+      { responseTime, errorMessage, scanTime: new Date().toISOString() }
+    );
+  }
+
+  /**
+   * Generate QR code image (alias for regenerateQRCode)
+   */
+  async generateQRCodeImage(id: string, currentUser: User): Promise<Equipment> {
+    return this.regenerateQRCode(id, currentUser);
+  }
+
+  /**
    * Private method to generate QR code
    */
   private async generateQRCode(equipmentId: string): Promise<string> {

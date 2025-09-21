@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SubscriptionsController = void 0;
 const common_1 = require("@nestjs/common");
@@ -24,13 +23,13 @@ const invoice_entity_1 = require("../models/invoice.entity");
 const user_entity_1 = require("../models/user.entity");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const roles_guard_1 = require("../auth/roles.guard");
-const roles_decorator_1 = require("../auth/roles.decorator");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 let SubscriptionsController = class SubscriptionsController {
     constructor(subscriptionService, invoiceService) {
         this.subscriptionService = subscriptionService;
         this.invoiceService = invoiceService;
     }
-    async getSubscriptions(ownerId, isActive, billingFrequency, paymentMethod, page = 1, limit = 50, req) {
+    async getSubscriptions(ownerId, isActive, billingFrequency, paymentMethod, page, limit, req) {
         const currentUser = req.user;
         const filters = {};
         if (ownerId)
@@ -55,7 +54,7 @@ let SubscriptionsController = class SubscriptionsController {
         const currentUser = req.user;
         return this.subscriptionService.create(createSubscriptionDto, currentUser);
     }
-    async exportSubscriptions(format = subscription_service_1.SubscriptionExportFormat.EXCEL, startDate, endDate, includeInvoices = true, res, req) {
+    async exportSubscriptions(res, req, format, startDate, endDate, includeInvoices) {
         const currentUser = req.user;
         const exportOptions = {
             format,
@@ -63,17 +62,12 @@ let SubscriptionsController = class SubscriptionsController {
             endDate: endDate ? new Date(endDate) : undefined,
             includeInvoices,
         };
-        const exportResult = await this.subscriptionService.exportSubscriptions(exportOptions, currentUser);
+        const exportResult = await this.subscriptionService.exportSubscriptions(format, { startDate: startDate ? new Date(startDate) : undefined, endDate: endDate ? new Date(endDate) : undefined }, currentUser);
         const timestamp = new Date().toISOString().split('T')[0];
         const filename = `subscriptions_export_${timestamp}.${format}`;
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-        res.setHeader('Content-Type', exportResult.mimeType);
-        if (format === subscription_service_1.SubscriptionExportFormat.JSON) {
-            res.json(exportResult.data);
-        }
-        else {
-            res.send(exportResult.buffer);
-        }
+        res.setHeader('Content-Type', exportResult.contentType);
+        res.send(exportResult.buffer);
     }
     async getSubscriptionById(id, req) {
         const currentUser = req.user;
@@ -83,7 +77,7 @@ let SubscriptionsController = class SubscriptionsController {
         const currentUser = req.user;
         return this.subscriptionService.update(id, updateSubscriptionDto, currentUser);
     }
-    async getSubscriptionInvoices(id, page = 1, limit = 20, req) {
+    async getSubscriptionInvoices(id, page, limit, req) {
         const currentUser = req.user;
         const pagination = { page, limit };
         const result = await this.invoiceService.findBySubscription(id, pagination, currentUser);
@@ -127,7 +121,7 @@ __decorate([
         summary: 'List subscriptions',
         description: 'Get subscriptions with filtering and pagination'
     }),
-    (0, swagger_1.ApiQuery)({ name: 'ownerId', type: 'string', format: 'uuid', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'ownerId', type: 'string', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'isActive', type: 'boolean', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'billingFrequency', enum: subscription_entity_1.BillingFrequency, required: false }),
     (0, swagger_1.ApiQuery)({ name: 'paymentMethod', enum: subscription_entity_1.PaymentMethod, required: false }),
@@ -175,7 +169,7 @@ __decorate([
                 price: { type: 'number', format: 'decimal' },
                 billingFrequency: { enum: Object.values(subscription_entity_1.BillingFrequency) },
                 paymentMethod: { enum: Object.values(subscription_entity_1.PaymentMethod) },
-                ownerId: { type: 'string', format: 'uuid' },
+                ownerId: { type: 'string' },
                 ownerEmail: { type: 'string', format: 'email' },
                 renewalDate: { type: 'string', format: 'date' }
             }
@@ -206,8 +200,8 @@ __decorate([
         required: false,
         description: 'Export format (default: excel)'
     }),
-    (0, swagger_1.ApiQuery)({ name: 'startDate', type: 'string', format: 'date', required: false }),
-    (0, swagger_1.ApiQuery)({ name: 'endDate', type: 'string', format: 'date', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'startDate', type: 'string', required: false, description: 'Start date (YYYY-MM-DD)' }),
+    (0, swagger_1.ApiQuery)({ name: 'endDate', type: 'string', required: false, description: 'End date (YYYY-MM-DD)' }),
     (0, swagger_1.ApiQuery)({ name: 'includeInvoices', type: 'boolean', required: false, description: 'Include invoice data' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
@@ -223,14 +217,14 @@ __decorate([
             }
         }
     }),
-    __param(0, (0, common_1.Query)('format')),
-    __param(1, (0, common_1.Query)('startDate')),
-    __param(2, (0, common_1.Query)('endDate')),
-    __param(3, (0, common_1.Query)('includeInvoices')),
-    __param(4, (0, common_1.Res)()),
-    __param(5, (0, common_1.Req)()),
+    __param(0, (0, common_1.Res)()),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Query)("format")),
+    __param(3, (0, common_1.Query)("startDate")),
+    __param(4, (0, common_1.Query)("endDate")),
+    __param(5, (0, common_1.Query)("includeInvoices")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_a = typeof subscription_service_1.SubscriptionExportFormat !== "undefined" && subscription_service_1.SubscriptionExportFormat) === "function" ? _a : Object, String, String, Boolean, Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, String, String, String, Boolean]),
     __metadata("design:returntype", Promise)
 ], SubscriptionsController.prototype, "exportSubscriptions", null);
 __decorate([
@@ -239,7 +233,7 @@ __decorate([
         summary: 'Get subscription details',
         description: 'Retrieve subscription with invoice history and owner information'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'Subscription details retrieved',
@@ -274,7 +268,7 @@ __decorate([
         summary: 'Update subscription',
         description: 'Update subscription information and billing details'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'Subscription update data',
         schema: {
@@ -308,7 +302,7 @@ __decorate([
         summary: 'Get subscription invoices',
         description: 'Retrieve all invoices for a specific subscription'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiQuery)({ name: 'page', type: 'number', required: false, example: 1 }),
     (0, swagger_1.ApiQuery)({ name: 'limit', type: 'number', required: false, example: 20 }),
     (0, swagger_1.ApiResponse)({
@@ -340,7 +334,7 @@ __decorate([
         description: 'Upload invoice file with automatic metadata extraction'
     }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'Invoice upload data',
         schema: {
@@ -391,7 +385,7 @@ __decorate([
         summary: 'Get subscription analytics',
         description: 'Retrieve subscription usage and cost analytics'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'Analytics data retrieved',

@@ -214,6 +214,9 @@ describe('SubscriptionService', () => {
                 andWhere: jest.fn().mockReturnThis(),
                 orderBy: jest.fn().mockReturnThis(),
                 getMany: jest.fn().mockResolvedValue([]),
+                skip: jest.fn().mockReturnThis(),
+                take: jest.fn().mockReturnThis(),
+                getCount: jest.fn().mockResolvedValue(0),
             };
             mockSubscriptionRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
             await expect(service.exportSubscriptions('xml', {}, adminUser))

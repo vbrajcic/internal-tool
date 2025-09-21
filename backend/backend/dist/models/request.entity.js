@@ -9,17 +9,21 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Request = exports.Decision = exports.RequestStatus = void 0;
+exports.Request = exports.Decision = exports.RequestStatus = exports.EquipmentType = void 0;
 const typeorm_1 = require("typeorm");
 const user_entity_1 = require("./user.entity");
 const equipment_entity_1 = require("./equipment.entity");
+Object.defineProperty(exports, "EquipmentType", { enumerable: true, get: function () { return equipment_entity_1.EquipmentType; } });
 var RequestStatus;
 (function (RequestStatus) {
     RequestStatus["SUBMITTED"] = "Submitted";
     RequestStatus["TEAM_LEAD_REVIEW"] = "TeamLeadReview";
     RequestStatus["ADMIN_REVIEW"] = "AdminReview";
+    RequestStatus["PENDING_TEAM_LEAD_APPROVAL"] = "PendingTeamLeadApproval";
+    RequestStatus["PENDING_ADMIN_APPROVAL"] = "PendingAdminApproval";
     RequestStatus["APPROVED"] = "Approved";
     RequestStatus["REJECTED"] = "Rejected";
+    RequestStatus["CANCELLED"] = "Cancelled";
     RequestStatus["ORDERED"] = "Ordered";
     RequestStatus["FULFILLED"] = "Fulfilled";
 })(RequestStatus || (exports.RequestStatus = RequestStatus = {}));
@@ -176,6 +180,10 @@ __decorate([
     (0, typeorm_1.Column)('text', { nullable: true }),
     __metadata("design:type", String)
 ], Request.prototype, "rejectionReason", void 0);
+__decorate([
+    (0, typeorm_1.Column)('text', { nullable: true }),
+    __metadata("design:type", String)
+], Request.prototype, "notes", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

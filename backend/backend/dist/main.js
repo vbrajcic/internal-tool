@@ -36,7 +36,8 @@ async function bootstrap() {
     app.useGlobalPipes(new validation_pipe_1.ValidationPipe());
     app.setGlobalPrefix('api');
     if (process.env.NODE_ENV === 'production') {
-        app.set('trust proxy', 1);
+        const expressApp = app.getHttpAdapter().getInstance();
+        expressApp.set('trust proxy', 1);
     }
     const config = new swagger_1.DocumentBuilder()
         .setTitle('Asset Management API')

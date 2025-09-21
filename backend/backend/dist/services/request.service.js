@@ -108,12 +108,12 @@ let RequestService = class RequestService {
             },
         });
         return {
-            requests,
+            items: requests,
             pagination: {
                 page,
                 limit,
                 total,
-                pages: Math.ceil(total / limit),
+                totalPages: Math.ceil(total / limit),
             },
         };
     }
@@ -321,6 +321,9 @@ let RequestService = class RequestService {
             [request_entity_1.RequestStatus.REJECTED]: 0,
             [request_entity_1.RequestStatus.ORDERED]: 0,
             [request_entity_1.RequestStatus.FULFILLED]: 0,
+            [request_entity_1.RequestStatus.PENDING_TEAM_LEAD_APPROVAL]: 0,
+            [request_entity_1.RequestStatus.PENDING_ADMIN_APPROVAL]: 0,
+            [request_entity_1.RequestStatus.CANCELLED]: 0,
         };
         statusStats.forEach(stat => {
             byStatus[stat.status] = parseInt(stat.count);
@@ -336,6 +339,81 @@ let RequestService = class RequestService {
             fulfilled: byStatus[request_entity_1.RequestStatus.FULFILLED],
             byStatus,
             avgProcessingTimeHours: parseFloat(processingTimes?.avgHours || '0'),
+        };
+    }
+    async getPendingApprovals(user) {
+        let whereConditions = {};
+        if (user.role === user_entity_1.UserRole.TEAM_LEAD) {
+            whereConditions = {
+                teamLeadId: user.id,
+                status: request_entity_1.RequestStatus.PENDING_TEAM_LEAD_APPROVAL
+            };
+        }
+        else if (user.role === user_entity_1.UserRole.ADMIN) {
+            whereConditions = {
+                status: request_entity_1.RequestStatus.PENDING_ADMIN_APPROVAL
+            };
+        }
+        else {
+            return [];
+        }
+        return this.requestRepository.find({
+            where: whereConditions,
+            relations: ['requester', 'teamLead', 'equipment'],
+            order: { requestedAt: 'ASC' }
+        });
+    }
+    async fulfill(id, fulfillmentData, admin) {
+        return this.fulfillRequest(id, fulfillmentData, admin);
+    }
+    async cancel(id, cancellationData, user) {
+        const request = await this.findById(id, user);
+        if ([request_entity_1.RequestStatus.FULFILLED, request_entity_1.RequestStatus.CANCELLED].includes(request.status)) {
+            throw new common_1.BadRequestException('Cannot cancel a request that is already fulfilled or cancelled');
+        }
+        if (request.requesterId !== user.id && user.role !== user_entity_1.UserRole.ADMIN) {
+            throw new common_1.ForbiddenException('Only the requester or admin can cancel a request');
+        }
+        await this.requestRepository.update(id, {
+            status: request_entity_1.RequestStatus.CANCELLED,
+            notes: request.notes ? `${request.notes}\n\nCANCELLED: ${cancellationData.reason}` : `CANCELLED: ${cancellationData.reason}`,
+            teamLeadReviewedAt: new Date()
+        });
+        return this.findById(id, user);
+    }
+    async getAnalytics(dateRange, user) {
+        const queryBuilder = this.requestRepository.createQueryBuilder('request');
+        if (dateRange.startDate) {
+            queryBuilder.andWhere('request.requestedAt >= :startDate', { startDate: dateRange.startDate });
+        }
+        if (dateRange.endDate) {
+            queryBuilder.andWhere('request.requestedAt <= :endDate', { endDate: dateRange.endDate });
+        }
+        if (user.role === user_entity_1.UserRole.EMPLOYEE) {
+            queryBuilder.andWhere('request.requesterId = :userId', { userId: user.id });
+        }
+        else if (user.role === user_entity_1.UserRole.TEAM_LEAD) {
+            queryBuilder.andWhere('(request.requesterId = :userId OR request.teamLeadId = :userId)', { userId: user.id });
+        }
+        const [requests, total] = await queryBuilder.getManyAndCount();
+        const statusCounts = requests.reduce((acc, request) => {
+            acc[request.status] = (acc[request.status] || 0) + 1;
+            return acc;
+        }, {});
+        const equipmentTypeCounts = requests.reduce((acc, request) => {
+            acc[request.equipmentType] = (acc[request.equipmentType] || 0) + 1;
+            return acc;
+        }, {});
+        const avgProcessingTime = requests.length > 0
+            ? requests.reduce((sum, req) => sum + req.processingTimeInHours, 0) / requests.length
+            : 0;
+        return {
+            total,
+            statusBreakdown: statusCounts,
+            equipmentTypeBreakdown: equipmentTypeCounts,
+            averageProcessingTimeHours: avgProcessingTime,
+            periodStart: dateRange.startDate,
+            periodEnd: dateRange.endDate,
         };
     }
     canAccessRequest(request, user) {

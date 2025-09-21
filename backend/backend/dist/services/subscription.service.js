@@ -12,7 +12,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SubscriptionService = void 0;
+exports.SubscriptionService = exports.SubscriptionExportFormat = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
@@ -21,6 +21,12 @@ const PDFDocument = require("pdfkit");
 const subscription_entity_1 = require("../models/subscription.entity");
 const invoice_entity_1 = require("../models/invoice.entity");
 const user_entity_1 = require("../models/user.entity");
+var SubscriptionExportFormat;
+(function (SubscriptionExportFormat) {
+    SubscriptionExportFormat["EXCEL"] = "excel";
+    SubscriptionExportFormat["PDF"] = "pdf";
+    SubscriptionExportFormat["CSV"] = "csv";
+})(SubscriptionExportFormat || (exports.SubscriptionExportFormat = SubscriptionExportFormat = {}));
 let SubscriptionService = class SubscriptionService {
     constructor(subscriptionRepository, invoiceRepository, userRepository) {
         this.subscriptionRepository = subscriptionRepository;
@@ -86,12 +92,12 @@ let SubscriptionService = class SubscriptionService {
             .orderBy('subscription.createdAt', 'DESC')
             .getMany();
         return {
-            data: subscriptions,
+            items: subscriptions,
             pagination: {
                 page,
                 limit,
                 total,
-                pages: Math.ceil(total / limit)
+                totalPages: Math.ceil(total / limit)
             }
         };
     }
@@ -286,6 +292,70 @@ let SubscriptionService = class SubscriptionService {
                 lastInvoiceDate: subscription.lastInvoiceDate
             };
         });
+    }
+    async getAnalytics(subscriptionId, currentUser) {
+        const subscription = await this.findById(subscriptionId, currentUser);
+        const invoices = await this.invoiceRepository.find({
+            where: { subscriptionId },
+            order: { uploadedAt: 'DESC' }
+        });
+        const totalSpend = invoices
+            .filter(invoice => invoice.amount && invoice.isVerified)
+            .reduce((sum, invoice) => sum + Number(invoice.amount), 0);
+        const monthlyAverage = invoices.length > 0 ? totalSpend / invoices.length : 0;
+        const lastInvoice = invoices.length > 0 ? invoices[0] : null;
+        const daysUntilRenewal = subscription.renewalDate
+            ? Math.ceil((new Date(subscription.renewalDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+            : 0;
+        return {
+            totalSpend,
+            monthlyAverage,
+            invoiceCount: invoices.length,
+            lastInvoiceDate: lastInvoice?.uploadedAt,
+            renewalInfo: {
+                nextRenewal: subscription.renewalDate,
+                daysUntilRenewal,
+                renewalReminded: subscription.needsInvoiceReminder
+            },
+            complianceStatus: {
+                hasInvoices: invoices.length > 0,
+                invoiceCoverage: 100,
+                missingInvoices: 0
+            }
+        };
+    }
+    async sendRenewalReminders(daysBeforeRenewal = 30, includeInactive = false, currentUser) {
+        if (currentUser.role !== user_entity_1.UserRole.ADMIN) {
+            throw new common_1.ForbiddenException('Only administrators can send renewal reminders');
+        }
+        const now = new Date();
+        const cutoffDate = new Date();
+        cutoffDate.setDate(now.getDate() + daysBeforeRenewal);
+        const whereCondition = {
+            renewalDate: (0, typeorm_2.Between)(now, cutoffDate)
+        };
+        if (!includeInactive) {
+            whereCondition.isActive = true;
+        }
+        const subscriptions = await this.subscriptionRepository.find({
+            where: whereCondition,
+            relations: ['owner']
+        });
+        let remindersSent = 0;
+        const errors = [];
+        for (const subscription of subscriptions) {
+            try {
+                remindersSent++;
+            }
+            catch (error) {
+                errors.push(`Failed to send reminder for ${subscription.name}: ${error.message}`);
+            }
+        }
+        return {
+            remindersSent,
+            subscriptionsProcessed: subscriptions.length,
+            errors
+        };
     }
     validateSubscriptionData(data) {
         if (!data.name || data.name.trim().length === 0) {

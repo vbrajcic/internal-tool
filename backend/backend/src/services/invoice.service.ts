@@ -8,6 +8,8 @@ import { S3Service } from './s3.service';
 
 export interface CreateInvoiceDto {
   subscriptionId: string;
+  fileBuffer: Buffer;
+  fileName: string;
   amount?: number;
   invoiceDate?: Date;
   description?: string;
@@ -46,6 +48,21 @@ export interface InvoiceStats {
   overdueVerification: number;
 }
 
+export interface PaginationOptions {
+  page: number;
+  limit: number;
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 @Injectable()
 export class InvoiceService {
   private readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -61,6 +78,41 @@ export class InvoiceService {
     private userRepository: Repository<User>,
     private s3Service: S3Service,
   ) {}
+
+  /**
+   * Create invoice from uploaded file data
+   */
+  async create(createInvoiceDto: CreateInvoiceDto, uploader: User): Promise<Invoice> {
+    // Create a mock file object from the buffer data
+    const mockFile: Express.Multer.File = {
+      fieldname: 'file',
+      originalname: createInvoiceDto.fileName,
+      encoding: '7bit',
+      mimetype: 'application/pdf',
+      size: createInvoiceDto.fileBuffer.length,
+      buffer: createInvoiceDto.fileBuffer,
+      destination: '',
+      filename: createInvoiceDto.fileName,
+      path: '',
+      stream: null as any,
+    };
+
+    const metadata: InvoiceUploadMetadata = {
+      fileName: createInvoiceDto.fileName,
+      fileSize: createInvoiceDto.fileBuffer.length,
+      contentType: 'application/pdf',
+      amount: createInvoiceDto.amount,
+      invoiceDate: createInvoiceDto.invoiceDate,
+      description: createInvoiceDto.description,
+    };
+
+    return this.uploadInvoice(
+      createInvoiceDto.subscriptionId,
+      mockFile,
+      metadata,
+      uploader
+    );
+  }
 
   /**
    * Upload invoice file to S3 and create invoice record
@@ -116,15 +168,34 @@ export class InvoiceService {
   /**
    * Get invoices for a subscription with role-based access control
    */
-  async findBySubscription(subscriptionId: string, user: User): Promise<Invoice[]> {
+  async findBySubscription(
+    subscriptionId: string,
+    pagination: PaginationOptions,
+    user: User
+  ): Promise<PaginatedResult<Invoice>> {
     // Validate subscription exists and user has access
     await this.validateSubscriptionAccess(subscriptionId, user);
 
-    return await this.invoiceRepository.find({
+    const { page, limit } = pagination;
+    const offset = (page - 1) * limit;
+
+    const [items, total] = await this.invoiceRepository.findAndCount({
       where: { subscriptionId },
       relations: ['uploadedBy', 'verifiedBy'],
-      order: { uploadedAt: 'DESC' }
+      order: { uploadedAt: 'DESC' },
+      skip: offset,
+      take: limit,
     });
+
+    return {
+      items,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   /**

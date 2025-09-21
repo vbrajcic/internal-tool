@@ -31,7 +31,7 @@ import { User, UserRole } from '../models/user.entity';
 import { Team } from '../models/team.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('users-teams')
 @ApiBearerAuth()
@@ -72,13 +72,12 @@ export class UsersController {
     }
   })
   async getUsers(
-    @Query('role') role?: UserRole,
-    @Query('teamId', new ParseUUIDPipe({ optional: true })) teamId?: string,
-    @Query('isActive', new ParseBoolPipe({ optional: true })) isActive?: boolean,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
     @Req() req: any,
-  ) {
+    @Query("page", new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query("limit", new DefaultValuePipe(10), ParseIntPipe) limit?: number,
+    @Query("role") role?: UserRole,
+    @Query("teamId", new ParseUUIDPipe({ optional: true })) teamId?: string,
+    @Query("isActive", new ParseBoolPipe({ optional: true })) isActive?: boolean,  ) {
     const currentUser: User = req.user;
 
     // Role-based filtering
@@ -117,7 +116,7 @@ export class UsersController {
         firstName: { type: 'string' },
         lastName: { type: 'string' },
         role: { enum: Object.values(UserRole) },
-        teamId: { type: 'string', format: 'uuid' }
+        teamId: { type: 'string' }
       }
     }
   })
@@ -140,7 +139,7 @@ export class UsersController {
     summary: 'Get user details',
     description: 'Retrieve user with assigned equipment and subscriptions'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiResponse({
     status: 200,
     description: 'User details retrieved',
@@ -173,7 +172,7 @@ export class UsersController {
     summary: 'Update user',
     description: 'Update user profile and role assignment'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'User update data',
     schema: {
@@ -182,7 +181,7 @@ export class UsersController {
         firstName: { type: 'string' },
         lastName: { type: 'string' },
         role: { enum: Object.values(UserRole) },
-        teamId: { type: 'string', format: 'uuid' }
+        teamId: { type: 'string' }
       }
     }
   })
@@ -207,7 +206,7 @@ export class UsersController {
     summary: 'Deactivate user (preserve audit trail)',
     description: 'Deactivate user and handle equipment transfer'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'Deactivation data',
     schema: {
@@ -215,7 +214,7 @@ export class UsersController {
       required: ['reason'],
       properties: {
         reason: { type: 'string' },
-        transferEquipmentTo: { type: 'string', format: 'uuid', nullable: true }
+        transferEquipmentTo: { type: 'string', nullable: true }
       }
     }
   })
@@ -274,7 +273,7 @@ export class UsersController {
       required: ['name', 'leadId'],
       properties: {
         name: { type: 'string' },
-        leadId: { type: 'string', format: 'uuid' },
+        leadId: { type: 'string' },
         description: { type: 'string' }
       }
     }
@@ -297,7 +296,7 @@ export class UsersController {
     summary: 'Get team details',
     description: 'Retrieve team with members and equipment'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiResponse({
     status: 200,
     description: 'Team details retrieved',
@@ -325,14 +324,14 @@ export class UsersController {
     summary: 'Update team',
     description: 'Update team information and lead assignment'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'Team update data',
     schema: {
       type: 'object',
       properties: {
         name: { type: 'string' },
-        leadId: { type: 'string', format: 'uuid' },
+        leadId: { type: 'string' },
         description: { type: 'string' }
       }
     }

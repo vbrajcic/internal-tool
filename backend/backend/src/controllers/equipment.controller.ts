@@ -38,7 +38,7 @@ import { Transfer } from '../models/transfer.entity';
 import { User, UserRole } from '../models/user.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('equipment')
 @ApiBearerAuth()
@@ -54,7 +54,7 @@ export class EquipmentController {
   })
   @ApiQuery({ name: 'status', enum: EquipmentStatus, required: false })
   @ApiQuery({ name: 'type', enum: EquipmentType, required: false })
-  @ApiQuery({ name: 'ownerId', type: 'string', format: 'uuid', required: false })
+  @ApiQuery({ name: 'ownerId', type: 'string', required: false })
   @ApiQuery({ name: 'page', type: 'number', required: false, example: 1 })
   @ApiQuery({ name: 'limit', type: 'number', required: false, example: 50 })
   @ApiResponse({
@@ -72,11 +72,11 @@ export class EquipmentController {
     }
   })
   async getEquipment(
-    @Query('status') status?: EquipmentStatus,
-    @Query('type') type?: EquipmentType,
-    @Query('ownerId', new ParseUUIDPipe({ optional: true })) ownerId?: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number = 50,
+    @Query('status') status: EquipmentStatus,
+    @Query('type') type: EquipmentType,
+    @Query('ownerId', new ParseUUIDPipe({ optional: true })) ownerId: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
     @Req() req: any,
   ) {
     const currentUser: User = req.user;
@@ -148,7 +148,7 @@ export class EquipmentController {
     summary: 'Get equipment details',
     description: 'Retrieve equipment with transfer history and current owner'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiResponse({
     status: 200,
     description: 'Equipment details retrieved',
@@ -174,7 +174,7 @@ export class EquipmentController {
     @Req() req: any,
   ): Promise<Equipment> {
     const currentUser: User = req.user;
-    return this.equipmentService.findById(id, currentUser);
+    return this.equipmentService.findById(id);
   }
 
   @Put(':id')
@@ -182,7 +182,7 @@ export class EquipmentController {
     summary: 'Update equipment',
     description: 'Update equipment information and status'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'Equipment update data',
     schema: {
@@ -216,14 +216,14 @@ export class EquipmentController {
     summary: 'Transfer equipment ownership',
     description: 'Initiate equipment transfer with confirmation workflow'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'Transfer request data',
     schema: {
       type: 'object',
       required: ['reason'],
       properties: {
-        toUserId: { type: 'string', format: 'uuid', nullable: true },
+        toUserId: { type: 'string', nullable: true },
         reason: { type: 'string' }
       }
     }
@@ -320,7 +320,7 @@ export class EquipmentController {
     summary: 'Report equipment condition',
     description: 'Update equipment condition from mobile interface'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'Condition report data',
     schema: {
@@ -357,7 +357,7 @@ export class EquipmentController {
     summary: 'Generate QR code image',
     description: 'Generate QR code image for equipment printing'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiResponse({
     status: 200,
     description: 'QR code image generated',
@@ -379,7 +379,7 @@ export class EquipmentController {
 
   // Helper methods for mobile optimization
 
-  private getAvailableActions(equipment: Equipment, user: User): string[] {
+  private getAvailableActions(equipment: Equipment | EquipmentWithMobileOptimization, user: User): string[] {
     const actions: string[] = ['view', 'report_condition'];
 
     // Equipment owners can transfer their equipment
@@ -401,7 +401,7 @@ export class EquipmentController {
     return actions;
   }
 
-  private canReportCondition(equipment: Equipment, user: User): boolean {
+  private canReportCondition(equipment: Equipment | EquipmentWithMobileOptimization, user: User): boolean {
     // Equipment owners can always report condition
     if (equipment.currentOwnerId === user.id) {
       return true;

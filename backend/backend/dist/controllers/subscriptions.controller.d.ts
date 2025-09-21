@@ -7,22 +7,27 @@ export declare class SubscriptionsController {
     private readonly subscriptionService;
     private readonly invoiceService;
     constructor(subscriptionService: SubscriptionService, invoiceService: InvoiceService);
-    getSubscriptions(ownerId?: string, isActive?: boolean, billingFrequency?: BillingFrequency, paymentMethod?: PaymentMethod, page: number, limit: number, req: any): Promise<{
-        subscriptions: any;
+    getSubscriptions(ownerId: string, isActive: boolean, billingFrequency: BillingFrequency, paymentMethod: PaymentMethod, page: number, limit: number, req: any): Promise<{
+        subscriptions: Subscription[];
         pagination: {
             page: number;
             limit: number;
             total: number;
-            pages: number;
+            totalPages: number;
         };
     }>;
     createSubscription(createSubscriptionDto: CreateSubscriptionDto, req: any): Promise<Subscription>;
-    exportSubscriptions(format: SubscriptionExportFormat, startDate?: string, endDate?: string, includeInvoices: boolean, res: Response, req: any): Promise<void>;
+    exportSubscriptions(res: Response, req: any, format?: SubscriptionExportFormat, startDate?: string, endDate?: string, includeInvoices?: boolean): Promise<void>;
     getSubscriptionById(id: string, req: any): Promise<Subscription>;
     updateSubscription(id: string, updateSubscriptionDto: UpdateSubscriptionDto, req: any): Promise<Subscription>;
     getSubscriptionInvoices(id: string, page: number, limit: number, req: any): Promise<{
-        invoices: any;
-        pagination: any;
+        invoices: Invoice[];
+        pagination: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+        };
     }>;
     uploadInvoice(subscriptionId: string, file: Express.Multer.File, invoiceData: {
         amount?: string;
@@ -33,5 +38,9 @@ export declare class SubscriptionsController {
     sendRenewalReminders(reminderConfig: {
         daysBeforeRenewal?: number;
         includeInactive?: boolean;
-    }, req: any): Promise<any>;
+    }, req: any): Promise<{
+        remindersSent: number;
+        subscriptionsProcessed: number;
+        errors: string[];
+    }>;
 }

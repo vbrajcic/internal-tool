@@ -20,7 +20,7 @@ export class ValidationPipe extends NestValidationPipe implements PipeTransform<
         value: false, // Don't expose the validated value in error messages
       },
       exceptionFactory: (errors: ValidationError[]) => {
-        const messages = this.flattenValidationErrors(errors);
+        const messages = this.flattenErrors(errors);
         return new BadRequestException({
           statusCode: 400,
           message: 'Validation failed',
@@ -30,7 +30,7 @@ export class ValidationPipe extends NestValidationPipe implements PipeTransform<
     });
   }
 
-  private flattenValidationErrors(errors: ValidationError[]): Record<string, string[]> {
+  private flattenErrors(errors: ValidationError[]): Record<string, string[]> {
     const result: Record<string, string[]> = {};
 
     const extractErrors = (error: ValidationError, path: string = '') => {

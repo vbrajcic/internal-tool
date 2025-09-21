@@ -83,6 +83,10 @@ export declare class EquipmentService {
     delete(id: string, currentUser: User): Promise<void>;
     regenerateQRCode(id: string, currentUser: User): Promise<Equipment>;
     getEquipmentStats(): Promise<EquipmentStats>;
+    findByQRCode(qrCode: string, currentUser: User): Promise<EquipmentWithMobileOptimization>;
+    logQRScan(equipmentId: string, userId: string, responseTime: number): Promise<void>;
+    logQRScanFailure(qrCode: string, userId: string, responseTime: number, errorMessage: string): Promise<void>;
+    generateQRCodeImage(id: string, currentUser: User): Promise<Equipment>;
     private generateQRCode;
     private validateStatusTransition;
     private createAuditLog;

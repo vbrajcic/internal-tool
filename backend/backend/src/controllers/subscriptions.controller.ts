@@ -47,7 +47,7 @@ import { Invoice } from '../models/invoice.entity';
 import { User, UserRole } from '../models/user.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('subscriptions')
 @ApiBearerAuth()
@@ -64,7 +64,7 @@ export class SubscriptionsController {
     summary: 'List subscriptions',
     description: 'Get subscriptions with filtering and pagination'
   })
-  @ApiQuery({ name: 'ownerId', type: 'string', format: 'uuid', required: false })
+  @ApiQuery({ name: 'ownerId', type: 'string', required: false })
   @ApiQuery({ name: 'isActive', type: 'boolean', required: false })
   @ApiQuery({ name: 'billingFrequency', enum: BillingFrequency, required: false })
   @ApiQuery({ name: 'paymentMethod', enum: PaymentMethod, required: false })
@@ -85,12 +85,12 @@ export class SubscriptionsController {
     }
   })
   async getSubscriptions(
-    @Query('ownerId', new ParseUUIDPipe({ optional: true })) ownerId?: string,
-    @Query('isActive') isActive?: boolean,
-    @Query('billingFrequency') billingFrequency?: BillingFrequency,
-    @Query('paymentMethod') paymentMethod?: PaymentMethod,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number = 50,
+    @Query('ownerId', new ParseUUIDPipe({ optional: true })) ownerId: string,
+    @Query('isActive') isActive: boolean,
+    @Query('billingFrequency') billingFrequency: BillingFrequency,
+    @Query('paymentMethod') paymentMethod: PaymentMethod,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
     @Req() req: any,
   ) {
     const currentUser: User = req.user;
@@ -132,7 +132,7 @@ export class SubscriptionsController {
         price: { type: 'number', format: 'decimal' },
         billingFrequency: { enum: Object.values(BillingFrequency) },
         paymentMethod: { enum: Object.values(PaymentMethod) },
-        ownerId: { type: 'string', format: 'uuid' },
+        ownerId: { type: 'string' },
         ownerEmail: { type: 'string', format: 'email' },
         renewalDate: { type: 'string', format: 'date' }
       }
@@ -164,8 +164,8 @@ export class SubscriptionsController {
     required: false,
     description: 'Export format (default: excel)'
   })
-  @ApiQuery({ name: 'startDate', type: 'string', format: 'date', required: false })
-  @ApiQuery({ name: 'endDate', type: 'string', format: 'date', required: false })
+  @ApiQuery({ name: 'startDate', type: 'string', required: false, description: 'Start date (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'endDate', type: 'string', required: false, description: 'End date (YYYY-MM-DD)' })
   @ApiQuery({ name: 'includeInvoices', type: 'boolean', required: false, description: 'Include invoice data' })
   @ApiResponse({
     status: 200,
@@ -182,15 +182,14 @@ export class SubscriptionsController {
     }
   })
   async exportSubscriptions(
-    @Query('format') format: SubscriptionExportFormat = SubscriptionExportFormat.EXCEL,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-    @Query('includeInvoices') includeInvoices: boolean = true,
     @Res() res: Response,
     @Req() req: any,
+    @Query("format") format?: SubscriptionExportFormat,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
+    @Query("includeInvoices") includeInvoices?: boolean,
   ) {
     const currentUser: User = req.user;
-
     const exportOptions = {
       format,
       startDate: startDate ? new Date(startDate) : undefined,
@@ -199,7 +198,8 @@ export class SubscriptionsController {
     };
 
     const exportResult = await this.subscriptionService.exportSubscriptions(
-      exportOptions,
+      format,
+      { startDate: startDate ? new Date(startDate) : undefined, endDate: endDate ? new Date(endDate) : undefined },
       currentUser
     );
 
@@ -208,13 +208,9 @@ export class SubscriptionsController {
     const filename = `subscriptions_export_${timestamp}.${format}`;
 
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Content-Type', exportResult.mimeType);
+    res.setHeader('Content-Type', exportResult.contentType);
 
-    if (format === SubscriptionExportFormat.JSON) {
-      res.json(exportResult.data);
-    } else {
-      res.send(exportResult.buffer);
-    }
+    res.send(exportResult.buffer);
   }
 
   @Get(':id')
@@ -222,7 +218,7 @@ export class SubscriptionsController {
     summary: 'Get subscription details',
     description: 'Retrieve subscription with invoice history and owner information'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiResponse({
     status: 200,
     description: 'Subscription details retrieved',
@@ -258,7 +254,7 @@ export class SubscriptionsController {
     summary: 'Update subscription',
     description: 'Update subscription information and billing details'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'Subscription update data',
     schema: {
@@ -293,7 +289,7 @@ export class SubscriptionsController {
     summary: 'Get subscription invoices',
     description: 'Retrieve all invoices for a specific subscription'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiQuery({ name: 'page', type: 'number', required: false, example: 1 })
   @ApiQuery({ name: 'limit', type: 'number', required: false, example: 20 })
   @ApiResponse({
@@ -312,8 +308,8 @@ export class SubscriptionsController {
   })
   async getSubscriptionInvoices(
     @Param('id', ParseUUIDPipe) id: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number = 20,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Req() req: any,
   ) {
     const currentUser: User = req.user;
@@ -333,7 +329,7 @@ export class SubscriptionsController {
     description: 'Upload invoice file with automatic metadata extraction'
   })
   @ApiConsumes('multipart/form-data')
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'Invoice upload data',
     schema: {
@@ -407,7 +403,7 @@ export class SubscriptionsController {
     summary: 'Get subscription analytics',
     description: 'Retrieve subscription usage and cost analytics'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiResponse({
     status: 200,
     description: 'Analytics data retrieved',

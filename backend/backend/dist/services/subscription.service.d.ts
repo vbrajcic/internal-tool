@@ -2,6 +2,11 @@ import { Repository } from 'typeorm';
 import { Subscription, BillingFrequency, PaymentMethod } from '../models/subscription.entity';
 import { Invoice } from '../models/invoice.entity';
 import { User } from '../models/user.entity';
+export declare enum SubscriptionExportFormat {
+    EXCEL = "excel",
+    PDF = "pdf",
+    CSV = "csv"
+}
 export interface CreateSubscriptionDto {
     name: string;
     price: number;
@@ -31,13 +36,13 @@ export interface PaginationOptions {
     page: number;
     limit: number;
 }
-export interface PaginatedResponse<T> {
-    data: T[];
+export interface PaginatedResult<T> {
+    items: T[];
     pagination: {
         page: number;
         limit: number;
         total: number;
-        pages: number;
+        totalPages: number;
     };
 }
 export interface ExportFilters {
@@ -98,7 +103,7 @@ export declare class SubscriptionService {
     private userRepository;
     constructor(subscriptionRepository: Repository<Subscription>, invoiceRepository: Repository<Invoice>, userRepository: Repository<User>);
     create(subscriptionData: CreateSubscriptionDto, currentUser: User): Promise<Subscription>;
-    findAll(filters: SubscriptionFilters, pagination: PaginationOptions, currentUser: User): Promise<PaginatedResponse<Subscription>>;
+    findAll(filters: SubscriptionFilters, pagination: PaginationOptions, currentUser: User): Promise<PaginatedResult<Subscription>>;
     findById(id: string, currentUser: User): Promise<Subscription>;
     update(id: string, updateData: UpdateSubscriptionDto, currentUser: User): Promise<Subscription>;
     deactivate(id: string, currentUser: User): Promise<Subscription>;
@@ -111,6 +116,12 @@ export declare class SubscriptionService {
     getCostAnalysis(): Promise<CostAnalysis>;
     getSubscriptionStats(): Promise<SubscriptionStats>;
     getRenewalReminders(): Promise<RenewalReminder[]>;
+    getAnalytics(subscriptionId: string, currentUser: User): Promise<any>;
+    sendRenewalReminders(daysBeforeRenewal: number, includeInactive: boolean, currentUser: User): Promise<{
+        remindersSent: number;
+        subscriptionsProcessed: number;
+        errors: string[];
+    }>;
     private validateSubscriptionData;
     private applyRoleBasedFiltering;
     private validateAccessToSubscription;

@@ -265,6 +265,33 @@ export class UserService {
   }
 
   /**
+   * Find user by Auth0 ID (auth_id)
+   */
+  async findByAuthId(authId: string): Promise<User | null> {
+    return this.userRepository.findOne({
+      where: { authId: authId },
+      relations: ['team', 'assignedEquipment'],
+    });
+  }
+
+  /**
+   * Check if user is a team lead for a specific team
+   */
+  async isTeamLead(userId: string, teamId: string): Promise<boolean> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId, role: UserRole.TEAM_LEAD, teamId, isActive: true }
+    });
+    return !!user;
+  }
+
+  /**
+   * Find one user (alias for findById for compatibility)
+   */
+  async findOne(id: string): Promise<User> {
+    return this.findById(id);
+  }
+
+  /**
    * Get team members by team ID
    */
   async findByTeam(teamId: string): Promise<User[]> {

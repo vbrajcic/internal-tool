@@ -15,7 +15,7 @@ export class SimpleEquipmentController {
   @ApiResponse({ status: 200, description: 'Get all equipment' })
   async findAll(@Query() filters: any) {
     try {
-      return await this.equipmentService.findAll(filters);
+      return await this.equipmentService.findAll(filters, {}, null);
     } catch (error) {
       return [];
     }
@@ -35,7 +35,7 @@ export class SimpleEquipmentController {
   @ApiResponse({ status: 201, description: 'Create new equipment' })
   async create(@Body() createDto: any) {
     try {
-      return await this.equipmentService.create(createDto);
+      return await this.equipmentService.create(createDto, null);
     } catch (error) {
       throw new Error('Failed to create equipment');
     }
@@ -45,7 +45,7 @@ export class SimpleEquipmentController {
   @ApiResponse({ status: 200, description: 'Update equipment' })
   async update(@Param('id') id: string, @Body() updateDto: any) {
     try {
-      return await this.equipmentService.update(id, updateDto);
+      return await this.equipmentService.update(id, updateDto, null);
     } catch (error) {
       throw new Error('Failed to update equipment');
     }

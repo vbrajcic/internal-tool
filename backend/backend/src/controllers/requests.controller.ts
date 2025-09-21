@@ -38,7 +38,7 @@ import { Request, RequestStatus, EquipmentType } from '../models/request.entity'
 import { User, UserRole } from '../models/user.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @ApiTags('requests')
 @ApiBearerAuth()
@@ -54,8 +54,8 @@ export class RequestsController {
   })
   @ApiQuery({ name: 'status', enum: RequestStatus, required: false })
   @ApiQuery({ name: 'equipmentType', enum: EquipmentType, required: false })
-  @ApiQuery({ name: 'requesterId', type: 'string', format: 'uuid', required: false })
-  @ApiQuery({ name: 'teamLeadId', type: 'string', format: 'uuid', required: false })
+  @ApiQuery({ name: 'requesterId', type: 'string', required: false })
+  @ApiQuery({ name: 'teamLeadId', type: 'string', required: false })
   @ApiQuery({ name: 'page', type: 'number', required: false, example: 1 })
   @ApiQuery({ name: 'limit', type: 'number', required: false, example: 20 })
   @ApiResponse({
@@ -73,12 +73,12 @@ export class RequestsController {
     }
   })
   async getRequests(
-    @Query('status') status?: RequestStatus,
-    @Query('equipmentType') equipmentType?: EquipmentType,
-    @Query('requesterId', new ParseUUIDPipe({ optional: true })) requesterId?: string,
-    @Query('teamLeadId', new ParseUUIDPipe({ optional: true })) teamLeadId?: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number = 20,
+    @Query('status') status: RequestStatus,
+    @Query('equipmentType') equipmentType: EquipmentType,
+    @Query('requesterId', new ParseUUIDPipe({ optional: true })) requesterId: string,
+    @Query('teamLeadId', new ParseUUIDPipe({ optional: true })) teamLeadId: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Req() req: any,
   ) {
     const currentUser: User = req.user;
@@ -161,9 +161,9 @@ export class RequestsController {
     }
   })
   async getMyRequests(
-    @Query('status') status?: RequestStatus,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number = 20,
+    @Query('status') status: RequestStatus,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Req() req: any,
   ) {
     const currentUser: User = req.user;
@@ -205,18 +205,28 @@ export class RequestsController {
     }
   })
   async getPendingApprovals(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number = 20,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Req() req: any,
   ) {
     const currentUser: User = req.user;
     const pagination: PaginationOptions = { page, limit };
 
-    const result = await this.requestService.getPendingApprovals(pagination, currentUser);
+    const requests = await this.requestService.getPendingApprovals(currentUser);
+
+    // Apply manual pagination since the service method doesn't support it
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + limit;
+    const paginatedRequests = requests.slice(startIndex, endIndex);
 
     return {
-      requests: result.items,
-      pagination: result.pagination,
+      requests: paginatedRequests,
+      pagination: {
+        page,
+        limit,
+        total: requests.length,
+        totalPages: Math.ceil(requests.length / limit),
+      },
     };
   }
 
@@ -225,7 +235,7 @@ export class RequestsController {
     summary: 'Get request details',
     description: 'Retrieve detailed request information with approval history'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiResponse({
     status: 200,
     description: 'Request details retrieved',
@@ -258,7 +268,7 @@ export class RequestsController {
     summary: 'Update request',
     description: 'Update request details (only by requester and before approval)'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'Request update data',
     schema: {
@@ -292,7 +302,7 @@ export class RequestsController {
     summary: 'Team lead review',
     description: 'Review request as team lead (first approval stage)'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'Team lead review data',
     schema: {
@@ -332,7 +342,7 @@ export class RequestsController {
     summary: 'Admin review',
     description: 'Review request as admin (final approval stage)'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'Admin review data',
     schema: {
@@ -375,7 +385,7 @@ export class RequestsController {
     summary: 'Fulfill equipment request',
     description: 'Complete request by assigning specific equipment to requester'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'Fulfillment data',
     schema: {
@@ -419,7 +429,7 @@ export class RequestsController {
     summary: 'Cancel equipment request',
     description: 'Cancel request (by requester or admin)'
   })
-  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
     description: 'Cancellation data',
     schema: {
@@ -445,7 +455,7 @@ export class RequestsController {
     @Req() req: any,
   ): Promise<Request> {
     const currentUser: User = req.user;
-    return this.requestService.cancel(id, cancellationData.reason, currentUser);
+    return this.requestService.cancel(id, cancellationData, currentUser);
   }
 
   @Get('analytics/summary')
@@ -454,8 +464,8 @@ export class RequestsController {
     summary: 'Get request analytics',
     description: 'Retrieve request workflow analytics and statistics'
   })
-  @ApiQuery({ name: 'startDate', type: 'string', format: 'date', required: false })
-  @ApiQuery({ name: 'endDate', type: 'string', format: 'date', required: false })
+  @ApiQuery({ name: 'startDate', type: 'string', required: false })
+  @ApiQuery({ name: 'endDate', type: 'string', required: false })
   @ApiResponse({
     status: 200,
     description: 'Analytics data retrieved',
@@ -502,8 +512,8 @@ export class RequestsController {
     }
   })
   async getRequestAnalytics(
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
     @Req() req: any,
   ) {
     const currentUser: User = req.user;

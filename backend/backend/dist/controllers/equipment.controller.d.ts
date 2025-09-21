@@ -4,7 +4,7 @@ import { Transfer } from '../models/transfer.entity';
 export declare class EquipmentController {
     private readonly equipmentService;
     constructor(equipmentService: EquipmentService);
-    getEquipment(status?: EquipmentStatus, type?: EquipmentType, ownerId?: string, page: number, limit: number, req: any): Promise<{
+    getEquipment(status: EquipmentStatus, type: EquipmentType, ownerId: string, page: number, limit: number, req: any): Promise<{
         equipment: Equipment[];
         pagination: {
             page: number;
@@ -22,7 +22,7 @@ export declare class EquipmentController {
         condition: Condition;
         notes?: string;
     }, req: any): Promise<Equipment>;
-    generateQRCodeImage(id: string, req: any): Promise<any>;
+    generateQRCodeImage(id: string, req: any): Promise<Equipment>;
     private getAvailableActions;
     private canReportCondition;
 }

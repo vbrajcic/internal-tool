@@ -5,6 +5,8 @@ import { User } from '../models/user.entity';
 import { S3Service } from './s3.service';
 export interface CreateInvoiceDto {
     subscriptionId: string;
+    fileBuffer: Buffer;
+    fileName: string;
     amount?: number;
     invoiceDate?: Date;
     description?: string;
@@ -38,6 +40,19 @@ export interface InvoiceStats {
     pendingVerification: number;
     overdueVerification: number;
 }
+export interface PaginationOptions {
+    page: number;
+    limit: number;
+}
+export interface PaginatedResult<T> {
+    items: T[];
+    pagination: {
+        page: number;
+        limit: number;
+        total: number;
+        totalPages: number;
+    };
+}
 export declare class InvoiceService {
     private invoiceRepository;
     private subscriptionRepository;
@@ -47,8 +62,9 @@ export declare class InvoiceService {
     private readonly ALLOWED_MIME_TYPES;
     private readonly VERIFICATION_DEADLINE_DAYS;
     constructor(invoiceRepository: Repository<Invoice>, subscriptionRepository: Repository<Subscription>, userRepository: Repository<User>, s3Service: S3Service);
+    create(createInvoiceDto: CreateInvoiceDto, uploader: User): Promise<Invoice>;
     uploadInvoice(subscriptionId: string, file: Express.Multer.File, metadata: InvoiceUploadMetadata, uploader: User): Promise<Invoice>;
-    findBySubscription(subscriptionId: string, user: User): Promise<Invoice[]>;
+    findBySubscription(subscriptionId: string, pagination: PaginationOptions, user: User): Promise<PaginatedResult<Invoice>>;
     findById(id: string, user: User): Promise<Invoice>;
     verifyInvoice(id: string, verificationData: VerifyInvoiceDto, verifier: User): Promise<Invoice>;
     unverifyInvoice(id: string, user: User): Promise<Invoice>;

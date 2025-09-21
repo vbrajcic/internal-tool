@@ -19,7 +19,7 @@ const AdminPage: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<'users' | 'teams'>('users');
+  // const [activeTab] = useState<'users' | 'teams'>('users');
 
   // Redirect if not admin
   if (user?.role !== 'admin') {

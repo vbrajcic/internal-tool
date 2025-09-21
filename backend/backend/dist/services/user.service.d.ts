@@ -48,6 +48,9 @@ export declare class UserService {
     update(id: string, updateData: UpdateUserDto, currentUser: User): Promise<User>;
     deactivate(id: string, deactivationData: DeactivateUserDto, currentUser: User): Promise<User>;
     findByEmail(email: string): Promise<User | null>;
+    findByAuthId(authId: string): Promise<User | null>;
+    isTeamLead(userId: string, teamId: string): Promise<boolean>;
+    findOne(id: string): Promise<User>;
     findByTeam(teamId: string): Promise<User[]>;
     private validateEmail;
     private canModifyUser;

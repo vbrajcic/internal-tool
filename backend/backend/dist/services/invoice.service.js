@@ -30,6 +30,29 @@ let InvoiceService = class InvoiceService {
         this.ALLOWED_MIME_TYPES = ['application/pdf'];
         this.VERIFICATION_DEADLINE_DAYS = 7;
     }
+    async create(createInvoiceDto, uploader) {
+        const mockFile = {
+            fieldname: 'file',
+            originalname: createInvoiceDto.fileName,
+            encoding: '7bit',
+            mimetype: 'application/pdf',
+            size: createInvoiceDto.fileBuffer.length,
+            buffer: createInvoiceDto.fileBuffer,
+            destination: '',
+            filename: createInvoiceDto.fileName,
+            path: '',
+            stream: null,
+        };
+        const metadata = {
+            fileName: createInvoiceDto.fileName,
+            fileSize: createInvoiceDto.fileBuffer.length,
+            contentType: 'application/pdf',
+            amount: createInvoiceDto.amount,
+            invoiceDate: createInvoiceDto.invoiceDate,
+            description: createInvoiceDto.description,
+        };
+        return this.uploadInvoice(createInvoiceDto.subscriptionId, mockFile, metadata, uploader);
+    }
     async uploadInvoice(subscriptionId, file, metadata, uploader) {
         const subscription = await this.validateSubscriptionAccess(subscriptionId, uploader);
         this.validateFile(file);
@@ -57,13 +80,26 @@ let InvoiceService = class InvoiceService {
             throw new common_1.InternalServerErrorException(`Failed to upload invoice: ${error.message}`);
         }
     }
-    async findBySubscription(subscriptionId, user) {
+    async findBySubscription(subscriptionId, pagination, user) {
         await this.validateSubscriptionAccess(subscriptionId, user);
-        return await this.invoiceRepository.find({
+        const { page, limit } = pagination;
+        const offset = (page - 1) * limit;
+        const [items, total] = await this.invoiceRepository.findAndCount({
             where: { subscriptionId },
             relations: ['uploadedBy', 'verifiedBy'],
-            order: { uploadedAt: 'DESC' }
+            order: { uploadedAt: 'DESC' },
+            skip: offset,
+            take: limit,
         });
+        return {
+            items,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
     }
     async findById(id, user) {
         const invoice = await this.invoiceRepository.findOne({

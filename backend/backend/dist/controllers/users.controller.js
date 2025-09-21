@@ -21,13 +21,13 @@ const user_entity_1 = require("../models/user.entity");
 const team_entity_1 = require("../models/team.entity");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const roles_guard_1 = require("../auth/roles.guard");
-const roles_decorator_1 = require("../auth/roles.decorator");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 let UsersController = class UsersController {
     constructor(userService, teamService) {
         this.userService = userService;
         this.teamService = teamService;
     }
-    async getUsers(role, teamId, isActive, page = 1, limit = 10, req) {
+    async getUsers(req, page, limit, role, teamId, isActive) {
         const currentUser = req.user;
         const filters = {};
         if (role)
@@ -119,14 +119,14 @@ __decorate([
             }
         }
     }),
-    __param(0, (0, common_1.Query)('role')),
-    __param(1, (0, common_1.Query)('teamId', new common_1.ParseUUIDPipe({ optional: true }))),
-    __param(2, (0, common_1.Query)('isActive', new common_1.ParseBoolPipe({ optional: true }))),
-    __param(3, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
-    __param(4, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(10), common_1.ParseIntPipe)),
-    __param(5, (0, common_1.Req)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)("page", new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
+    __param(2, (0, common_1.Query)("limit", new common_1.DefaultValuePipe(10), common_1.ParseIntPipe)),
+    __param(3, (0, common_1.Query)("role")),
+    __param(4, (0, common_1.Query)("teamId", new common_1.ParseUUIDPipe({ optional: true }))),
+    __param(5, (0, common_1.Query)("isActive", new common_1.ParseBoolPipe({ optional: true }))),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Boolean, Number, Number, Object]),
+    __metadata("design:paramtypes", [Object, Number, Number, String, String, Boolean]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getUsers", null);
 __decorate([
@@ -146,7 +146,7 @@ __decorate([
                 firstName: { type: 'string' },
                 lastName: { type: 'string' },
                 role: { enum: Object.values(user_entity_1.UserRole) },
-                teamId: { type: 'string', format: 'uuid' }
+                teamId: { type: 'string' }
             }
         }
     }),
@@ -169,7 +169,7 @@ __decorate([
         summary: 'Get user details',
         description: 'Retrieve user with assigned equipment and subscriptions'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'User details retrieved',
@@ -188,7 +188,7 @@ __decorate([
         summary: 'Update user',
         description: 'Update user profile and role assignment'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'User update data',
         schema: {
@@ -197,7 +197,7 @@ __decorate([
                 firstName: { type: 'string' },
                 lastName: { type: 'string' },
                 role: { enum: Object.values(user_entity_1.UserRole) },
-                teamId: { type: 'string', format: 'uuid' }
+                teamId: { type: 'string' }
             }
         }
     }),
@@ -221,7 +221,7 @@ __decorate([
         summary: 'Deactivate user (preserve audit trail)',
         description: 'Deactivate user and handle equipment transfer'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'Deactivation data',
         schema: {
@@ -229,7 +229,7 @@ __decorate([
             required: ['reason'],
             properties: {
                 reason: { type: 'string' },
-                transferEquipmentTo: { type: 'string', format: 'uuid', nullable: true }
+                transferEquipmentTo: { type: 'string', nullable: true }
             }
         }
     }),
@@ -279,7 +279,7 @@ __decorate([
             required: ['name', 'leadId'],
             properties: {
                 name: { type: 'string' },
-                leadId: { type: 'string', format: 'uuid' },
+                leadId: { type: 'string' },
                 description: { type: 'string' }
             }
         }
@@ -301,7 +301,7 @@ __decorate([
         summary: 'Get team details',
         description: 'Retrieve team with members and equipment'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'Team details retrieved',
@@ -321,14 +321,14 @@ __decorate([
         summary: 'Update team',
         description: 'Update team information and lead assignment'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'Team update data',
         schema: {
             type: 'object',
             properties: {
                 name: { type: 'string' },
-                leadId: { type: 'string', format: 'uuid' },
+                leadId: { type: 'string' },
                 description: { type: 'string' }
             }
         }

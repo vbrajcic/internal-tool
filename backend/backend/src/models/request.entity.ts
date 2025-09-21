@@ -2,12 +2,18 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Jo
 import { User } from './user.entity';
 import { Equipment, EquipmentType } from './equipment.entity';
 
+// Re-export EquipmentType for use in controllers
+export { EquipmentType };
+
 export enum RequestStatus {
   SUBMITTED = 'Submitted',
   TEAM_LEAD_REVIEW = 'TeamLeadReview',
   ADMIN_REVIEW = 'AdminReview',
+  PENDING_TEAM_LEAD_APPROVAL = 'PendingTeamLeadApproval',
+  PENDING_ADMIN_APPROVAL = 'PendingAdminApproval',
   APPROVED = 'Approved',
   REJECTED = 'Rejected',
+  CANCELLED = 'Cancelled',
   ORDERED = 'Ordered',
   FULFILLED = 'Fulfilled',
 }
@@ -73,6 +79,9 @@ export class Request {
 
   @Column('text', { nullable: true })
   rejectionReason: string;
+
+  @Column('text', { nullable: true })
+  notes: string;
 
   @CreateDateColumn()
   requestedAt: Date;

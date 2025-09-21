@@ -15,7 +15,7 @@ export class LoggingMiddleware implements NestMiddleware {
 
     // Override the end method to log response
     const originalEnd = res.end;
-    res.end = function(chunk?: any, encoding?: any, cb?: any) {
+    (res.end as any) = function(chunk?: any, encoding?: any, cb?: any) {
       const responseTime = Date.now() - startTime;
       const { statusCode } = res;
       const contentLength = res.get('Content-Length') || '-';

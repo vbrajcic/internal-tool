@@ -21,12 +21,12 @@ const transfer_entity_1 = require("../models/transfer.entity");
 const user_entity_1 = require("../models/user.entity");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const roles_guard_1 = require("../auth/roles.guard");
-const roles_decorator_1 = require("../auth/roles.decorator");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 let EquipmentController = class EquipmentController {
     constructor(equipmentService) {
         this.equipmentService = equipmentService;
     }
-    async getEquipment(status, type, ownerId, page = 1, limit = 50, req) {
+    async getEquipment(status, type, ownerId, page, limit, req) {
         const currentUser = req.user;
         const filters = {};
         if (status)
@@ -53,7 +53,7 @@ let EquipmentController = class EquipmentController {
     }
     async getEquipmentById(id, req) {
         const currentUser = req.user;
-        return this.equipmentService.findById(id, currentUser);
+        return this.equipmentService.findById(id);
     }
     async updateEquipment(id, updateEquipmentDto, req) {
         const currentUser = req.user;
@@ -139,7 +139,7 @@ __decorate([
     }),
     (0, swagger_1.ApiQuery)({ name: 'status', enum: equipment_entity_1.EquipmentStatus, required: false }),
     (0, swagger_1.ApiQuery)({ name: 'type', enum: equipment_entity_1.EquipmentType, required: false }),
-    (0, swagger_1.ApiQuery)({ name: 'ownerId', type: 'string', format: 'uuid', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'ownerId', type: 'string', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'page', type: 'number', required: false, example: 1 }),
     (0, swagger_1.ApiQuery)({ name: 'limit', type: 'number', required: false, example: 50 }),
     (0, swagger_1.ApiResponse)({
@@ -209,7 +209,7 @@ __decorate([
         summary: 'Get equipment details',
         description: 'Retrieve equipment with transfer history and current owner'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'Equipment details retrieved',
@@ -242,7 +242,7 @@ __decorate([
         summary: 'Update equipment',
         description: 'Update equipment information and status'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'Equipment update data',
         schema: {
@@ -275,14 +275,14 @@ __decorate([
         summary: 'Transfer equipment ownership',
         description: 'Initiate equipment transfer with confirmation workflow'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'Transfer request data',
         schema: {
             type: 'object',
             required: ['reason'],
             properties: {
-                toUserId: { type: 'string', format: 'uuid', nullable: true },
+                toUserId: { type: 'string', nullable: true },
                 reason: { type: 'string' }
             }
         }
@@ -344,7 +344,7 @@ __decorate([
         summary: 'Report equipment condition',
         description: 'Update equipment condition from mobile interface'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'Condition report data',
         schema: {
@@ -374,7 +374,7 @@ __decorate([
         summary: 'Generate QR code image',
         description: 'Generate QR code image for equipment printing'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'QR code image generated',

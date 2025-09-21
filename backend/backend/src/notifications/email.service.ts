@@ -32,12 +32,15 @@ export class EmailService {
         region: this.configService.get('AWS_SES_REGION', 'us-east-1'),
       });
 
-      this.transporter = nodemailer.createTransporter({
-        SES: { ses, aws: { SES } },
-      });
-    } else {
+      this.transporter = nodemailer.createTransport({
+        service: "SES",
+        auth: {
+          user: this.configService.get("AWS_ACCESS_KEY_ID"),
+          pass: this.configService.get("AWS_SECRET_ACCESS_KEY")
+        }
+      });    } else {
       // SMTP configuration (fallback)
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         host: this.configService.get('SMTP_HOST'),
         port: this.configService.get<number>('SMTP_PORT', 587),
         secure: this.configService.get<boolean>('SMTP_SECURE', false),

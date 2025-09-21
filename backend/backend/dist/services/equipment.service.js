@@ -362,6 +362,18 @@ let EquipmentService = class EquipmentService {
             byClassification,
         };
     }
+    async findByQRCode(qrCode, currentUser) {
+        return this.findByQR(qrCode, currentUser);
+    }
+    async logQRScan(equipmentId, userId, responseTime) {
+        await this.createAuditLog('equipment_qr_scan', equipmentId, userId, audit_log_entity_1.AuditAction.CREATE, {}, { responseTime, scanTime: new Date().toISOString() });
+    }
+    async logQRScanFailure(qrCode, userId, responseTime, errorMessage) {
+        await this.createAuditLog('equipment_qr_scan_failure', qrCode, userId, audit_log_entity_1.AuditAction.CREATE, {}, { responseTime, errorMessage, scanTime: new Date().toISOString() });
+    }
+    async generateQRCodeImage(id, currentUser) {
+        return this.regenerateQRCode(id, currentUser);
+    }
     async generateQRCode(equipmentId) {
         try {
             return await QRCode.toDataURL(equipmentId, {

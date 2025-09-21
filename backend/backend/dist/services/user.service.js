@@ -154,6 +154,21 @@ let UserService = class UserService {
             relations: ['team', 'assignedEquipment'],
         });
     }
+    async findByAuthId(authId) {
+        return this.userRepository.findOne({
+            where: { authId: authId },
+            relations: ['team', 'assignedEquipment'],
+        });
+    }
+    async isTeamLead(userId, teamId) {
+        const user = await this.userRepository.findOne({
+            where: { id: userId, role: user_entity_1.UserRole.TEAM_LEAD, teamId, isActive: true }
+        });
+        return !!user;
+    }
+    async findOne(id) {
+        return this.findById(id);
+    }
     async findByTeam(teamId) {
         return this.userRepository.find({
             where: {

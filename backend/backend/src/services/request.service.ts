@@ -39,6 +39,8 @@ export interface RequestFilters {
   requesterId?: string;
   teamLeadId?: string;
   equipmentType?: EquipmentType;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 export interface PaginationOptions {
@@ -47,12 +49,12 @@ export interface PaginationOptions {
 }
 
 export interface PaginatedResult<T> {
-  requests: T[];
+  items: T[];
   pagination: {
     page: number;
     limit: number;
     total: number;
-    pages: number;
+    totalPages: number;
   };
 }
 
@@ -211,12 +213,12 @@ export class RequestService {
     });
 
     return {
-      requests,
+      items: requests,
       pagination: {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit),
+        totalPages: Math.ceil(total / limit),
       },
     };
   }
@@ -521,7 +523,9 @@ export class RequestService {
       [RequestStatus.REJECTED]: 0,
       [RequestStatus.ORDERED]: 0,
       [RequestStatus.FULFILLED]: 0,
-    };
+      [RequestStatus.PENDING_TEAM_LEAD_APPROVAL]: 0,
+      [RequestStatus.PENDING_ADMIN_APPROVAL]: 0,
+      [RequestStatus.CANCELLED]: 0,    };
 
     statusStats.forEach(stat => {
       byStatus[stat.status as RequestStatus] = parseInt(stat.count);
@@ -539,6 +543,114 @@ export class RequestService {
       fulfilled: byStatus[RequestStatus.FULFILLED],
       byStatus,
       avgProcessingTimeHours: parseFloat(processingTimes?.avgHours || '0'),
+    };
+  }
+
+
+  /**
+   * Get pending approvals for a user (team lead or admin)
+   */
+  async getPendingApprovals(user: User): Promise<Request[]> {
+    let whereConditions: any = {};
+
+    if (user.role === UserRole.TEAM_LEAD) {
+      whereConditions = {
+        teamLeadId: user.id,
+        status: RequestStatus.PENDING_TEAM_LEAD_APPROVAL
+      };
+    } else if (user.role === UserRole.ADMIN) {
+      whereConditions = {
+        status: RequestStatus.PENDING_ADMIN_APPROVAL
+      };
+    } else {
+      return [];
+    }
+
+    return this.requestRepository.find({
+      where: whereConditions,
+      relations: ['requester', 'teamLead', 'equipment'],
+      order: { requestedAt: 'ASC' }
+    });
+  }
+
+  /**
+   * Fulfill a request (alias for fulfillRequest)
+   */
+  async fulfill(id: string, fulfillmentData: FulfillRequestDto, admin: User): Promise<Request> {
+    return this.fulfillRequest(id, fulfillmentData, admin);
+  }
+
+  /**
+   * Cancel a request
+   */
+  async cancel(id: string, cancellationData: { reason: string }, user: User): Promise<Request> {
+    const request = await this.findById(id, user);
+
+    // Only allow cancellation if request is not already fulfilled or canceled
+    if ([RequestStatus.FULFILLED, RequestStatus.CANCELLED].includes(request.status)) {
+      throw new BadRequestException('Cannot cancel a request that is already fulfilled or cancelled');
+    }
+
+    // Only the requester or admin can cancel
+    if (request.requesterId !== user.id && user.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('Only the requester or admin can cancel a request');
+    }
+
+    await this.requestRepository.update(id, {
+      status: RequestStatus.CANCELLED,
+      notes: request.notes ? `${request.notes}\n\nCANCELLED: ${cancellationData.reason}` : `CANCELLED: ${cancellationData.reason}`,
+      teamLeadReviewedAt: new Date()
+    });
+
+    return this.findById(id, user);
+  }
+
+  /**
+   * Get request analytics
+   */
+  async getAnalytics(dateRange: { startDate?: Date; endDate?: Date }, user: User): Promise<any> {
+    // Basic analytics implementation
+    const queryBuilder = this.requestRepository.createQueryBuilder('request');
+
+    if (dateRange.startDate) {
+      queryBuilder.andWhere('request.requestedAt >= :startDate', { startDate: dateRange.startDate });
+    }
+
+    if (dateRange.endDate) {
+      queryBuilder.andWhere('request.requestedAt <= :endDate', { endDate: dateRange.endDate });
+    }
+
+    // Apply role-based filtering
+    if (user.role === UserRole.EMPLOYEE) {
+      queryBuilder.andWhere('request.requesterId = :userId', { userId: user.id });
+    } else if (user.role === UserRole.TEAM_LEAD) {
+      queryBuilder.andWhere('(request.requesterId = :userId OR request.teamLeadId = :userId)', { userId: user.id });
+    }
+
+    const [requests, total] = await queryBuilder.getManyAndCount();
+
+    // Calculate analytics
+    const statusCounts = requests.reduce((acc, request) => {
+      acc[request.status] = (acc[request.status] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const equipmentTypeCounts = requests.reduce((acc, request) => {
+      acc[request.equipmentType] = (acc[request.equipmentType] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const avgProcessingTime = requests.length > 0
+      ? requests.reduce((sum, req) => sum + req.processingTimeInHours, 0) / requests.length
+      : 0;
+
+    return {
+      total,
+      statusBreakdown: statusCounts,
+      equipmentTypeBreakdown: equipmentTypeCounts,
+      averageProcessingTimeHours: avgProcessingTime,
+      periodStart: dateRange.startDate,
+      periodEnd: dateRange.endDate,
     };
   }
 

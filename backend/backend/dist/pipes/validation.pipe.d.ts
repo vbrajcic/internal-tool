@@ -1,7 +1,7 @@
 import { PipeTransform, ValidationPipe as NestValidationPipe } from '@nestjs/common';
 export declare class ValidationPipe extends NestValidationPipe implements PipeTransform<any> {
     constructor();
-    private flattenValidationErrors;
+    private flattenErrors;
 }
 import { ValidationOptions } from 'class-validator';
 export declare function IsUUID(validationOptions?: ValidationOptions): (object: Object, propertyName: string) => void;

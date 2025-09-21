@@ -1,11 +1,15 @@
 import { User } from './user.entity';
 import { Equipment, EquipmentType } from './equipment.entity';
+export { EquipmentType };
 export declare enum RequestStatus {
     SUBMITTED = "Submitted",
     TEAM_LEAD_REVIEW = "TeamLeadReview",
     ADMIN_REVIEW = "AdminReview",
+    PENDING_TEAM_LEAD_APPROVAL = "PendingTeamLeadApproval",
+    PENDING_ADMIN_APPROVAL = "PendingAdminApproval",
     APPROVED = "Approved",
     REJECTED = "Rejected",
+    CANCELLED = "Cancelled",
     ORDERED = "Ordered",
     FULFILLED = "Fulfilled"
 }
@@ -28,6 +32,7 @@ export declare class Request {
     adminDecision: Decision;
     adminNotes: string;
     rejectionReason: string;
+    notes: string;
     requestedAt: Date;
     teamLeadReviewedAt: Date;
     adminReviewedAt: Date;

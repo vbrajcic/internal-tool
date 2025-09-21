@@ -6,7 +6,7 @@ export declare class UsersController {
     private readonly userService;
     private readonly teamService;
     constructor(userService: UserService, teamService: TeamService);
-    getUsers(role?: UserRole, teamId?: string, isActive?: boolean, page: number, limit: number, req: any): Promise<{
+    getUsers(req: any, page?: number, limit?: number, role?: UserRole, teamId?: string, isActive?: boolean): Promise<{
         users: User[];
         pagination: {
             page: number;

@@ -31,18 +31,20 @@ export interface RequestFilters {
     requesterId?: string;
     teamLeadId?: string;
     equipmentType?: EquipmentType;
+    startDate?: Date;
+    endDate?: Date;
 }
 export interface PaginationOptions {
     page?: number;
     limit?: number;
 }
 export interface PaginatedResult<T> {
-    requests: T[];
+    items: T[];
     pagination: {
         page: number;
         limit: number;
         total: number;
-        pages: number;
+        totalPages: number;
     };
 }
 export interface WorkflowStep {
@@ -77,6 +79,15 @@ export declare class RequestService {
     getWorkflowHistory(id: string, user: User): Promise<WorkflowStep[]>;
     getRequestQueue(role: UserRole, userId: string): Promise<Request[]>;
     getRequestStats(): Promise<RequestStats>;
+    getPendingApprovals(user: User): Promise<Request[]>;
+    fulfill(id: string, fulfillmentData: FulfillRequestDto, admin: User): Promise<Request>;
+    cancel(id: string, cancellationData: {
+        reason: string;
+    }, user: User): Promise<Request>;
+    getAnalytics(dateRange: {
+        startDate?: Date;
+        endDate?: Date;
+    }, user: User): Promise<any>;
     private canAccessRequest;
     private canModifyRequest;
     private simulateNotification;

@@ -3,28 +3,33 @@ import { Request, RequestStatus, EquipmentType } from '../models/request.entity'
 export declare class RequestsController {
     private readonly requestService;
     constructor(requestService: RequestService);
-    getRequests(status?: RequestStatus, equipmentType?: EquipmentType, requesterId?: string, teamLeadId?: string, page: number, limit: number, req: any): Promise<{
-        requests: any;
+    getRequests(status: RequestStatus, equipmentType: EquipmentType, requesterId: string, teamLeadId: string, page: number, limit: number, req: any): Promise<{
+        requests: Request[];
         pagination: {
             page: number;
             limit: number;
             total: number;
-            pages: number;
+            totalPages: number;
         };
     }>;
     createRequest(createRequestDto: CreateRequestDto, req: any): Promise<Request>;
-    getMyRequests(status?: RequestStatus, page: number, limit: number, req: any): Promise<{
-        requests: any;
+    getMyRequests(status: RequestStatus, page: number, limit: number, req: any): Promise<{
+        requests: Request[];
         pagination: {
             page: number;
             limit: number;
             total: number;
-            pages: number;
+            totalPages: number;
         };
     }>;
     getPendingApprovals(page: number, limit: number, req: any): Promise<{
-        requests: any;
-        pagination: any;
+        requests: Request[];
+        pagination: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+        };
     }>;
     getRequestById(id: string, req: any): Promise<Request>;
     updateRequest(id: string, updateRequestDto: UpdateRequestDto, req: any): Promise<Request>;
@@ -34,5 +39,5 @@ export declare class RequestsController {
     cancelRequest(id: string, cancellationData: {
         reason: string;
     }, req: any): Promise<Request>;
-    getRequestAnalytics(startDate?: string, endDate?: string, req: any): Promise<any>;
+    getRequestAnalytics(startDate: string, endDate: string, req: any): Promise<any>;
 }

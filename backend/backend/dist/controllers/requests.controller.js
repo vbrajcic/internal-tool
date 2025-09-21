@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RequestsController = void 0;
 const common_1 = require("@nestjs/common");
@@ -21,12 +20,12 @@ const request_entity_1 = require("../models/request.entity");
 const user_entity_1 = require("../models/user.entity");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const roles_guard_1 = require("../auth/roles.guard");
-const roles_decorator_1 = require("../auth/roles.decorator");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 let RequestsController = class RequestsController {
     constructor(requestService) {
         this.requestService = requestService;
     }
-    async getRequests(status, equipmentType, requesterId, teamLeadId, page = 1, limit = 20, req) {
+    async getRequests(status, equipmentType, requesterId, teamLeadId, page, limit, req) {
         const currentUser = req.user;
         const filters = {};
         if (status)
@@ -54,7 +53,7 @@ let RequestsController = class RequestsController {
         const currentUser = req.user;
         return this.requestService.create(createRequestDto, currentUser);
     }
-    async getMyRequests(status, page = 1, limit = 20, req) {
+    async getMyRequests(status, page, limit, req) {
         const currentUser = req.user;
         const filters = {
             requesterId: currentUser.id
@@ -68,13 +67,21 @@ let RequestsController = class RequestsController {
             pagination: result.pagination,
         };
     }
-    async getPendingApprovals(page = 1, limit = 20, req) {
+    async getPendingApprovals(page, limit, req) {
         const currentUser = req.user;
         const pagination = { page, limit };
-        const result = await this.requestService.getPendingApprovals(pagination, currentUser);
+        const requests = await this.requestService.getPendingApprovals(currentUser);
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedRequests = requests.slice(startIndex, endIndex);
         return {
-            requests: result.items,
-            pagination: result.pagination,
+            requests: paginatedRequests,
+            pagination: {
+                page,
+                limit,
+                total: requests.length,
+                totalPages: Math.ceil(requests.length / limit),
+            },
         };
     }
     async getRequestById(id, req) {
@@ -99,7 +106,7 @@ let RequestsController = class RequestsController {
     }
     async cancelRequest(id, cancellationData, req) {
         const currentUser = req.user;
-        return this.requestService.cancel(id, cancellationData.reason, currentUser);
+        return this.requestService.cancel(id, cancellationData, currentUser);
     }
     async getRequestAnalytics(startDate, endDate, req) {
         const currentUser = req.user;
@@ -119,8 +126,8 @@ __decorate([
     }),
     (0, swagger_1.ApiQuery)({ name: 'status', enum: request_entity_1.RequestStatus, required: false }),
     (0, swagger_1.ApiQuery)({ name: 'equipmentType', enum: request_entity_1.EquipmentType, required: false }),
-    (0, swagger_1.ApiQuery)({ name: 'requesterId', type: 'string', format: 'uuid', required: false }),
-    (0, swagger_1.ApiQuery)({ name: 'teamLeadId', type: 'string', format: 'uuid', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'requesterId', type: 'string', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'teamLeadId', type: 'string', required: false }),
     (0, swagger_1.ApiQuery)({ name: 'page', type: 'number', required: false, example: 1 }),
     (0, swagger_1.ApiQuery)({ name: 'limit', type: 'number', required: false, example: 20 }),
     (0, swagger_1.ApiResponse)({
@@ -145,7 +152,7 @@ __decorate([
     __param(5, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(20), common_1.ParseIntPipe)),
     __param(6, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_a = typeof request_entity_1.EquipmentType !== "undefined" && request_entity_1.EquipmentType) === "function" ? _a : Object, String, String, Number, Number, Object]),
+    __metadata("design:paramtypes", [String, String, String, String, Number, Number, Object]),
     __metadata("design:returntype", Promise)
 ], RequestsController.prototype, "getRequests", null);
 __decorate([
@@ -245,7 +252,7 @@ __decorate([
         summary: 'Get request details',
         description: 'Retrieve detailed request information with approval history'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'Request details retrieved',
@@ -277,7 +284,7 @@ __decorate([
         summary: 'Update request',
         description: 'Update request details (only by requester and before approval)'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'Request update data',
         schema: {
@@ -310,7 +317,7 @@ __decorate([
         summary: 'Team lead review',
         description: 'Review request as team lead (first approval stage)'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'Team lead review data',
         schema: {
@@ -349,7 +356,7 @@ __decorate([
         summary: 'Admin review',
         description: 'Review request as admin (final approval stage)'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'Admin review data',
         schema: {
@@ -391,7 +398,7 @@ __decorate([
         summary: 'Fulfill equipment request',
         description: 'Complete request by assigning specific equipment to requester'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'Fulfillment data',
         schema: {
@@ -434,7 +441,7 @@ __decorate([
         summary: 'Cancel equipment request',
         description: 'Cancel request (by requester or admin)'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', type: 'string', format: 'uuid' }),
+    (0, swagger_1.ApiParam)({ name: 'id', type: 'string' }),
     (0, swagger_1.ApiBody)({
         description: 'Cancellation data',
         schema: {
@@ -468,8 +475,8 @@ __decorate([
         summary: 'Get request analytics',
         description: 'Retrieve request workflow analytics and statistics'
     }),
-    (0, swagger_1.ApiQuery)({ name: 'startDate', type: 'string', format: 'date', required: false }),
-    (0, swagger_1.ApiQuery)({ name: 'endDate', type: 'string', format: 'date', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'startDate', type: 'string', required: false }),
+    (0, swagger_1.ApiQuery)({ name: 'endDate', type: 'string', required: false }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'Analytics data retrieved',

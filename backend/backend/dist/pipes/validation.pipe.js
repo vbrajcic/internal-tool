@@ -27,7 +27,7 @@ let ValidationPipe = class ValidationPipe extends common_1.ValidationPipe {
                 value: false,
             },
             exceptionFactory: (errors) => {
-                const messages = this.flattenValidationErrors(errors);
+                const messages = this.flattenErrors(errors);
                 return new common_1.BadRequestException({
                     statusCode: 400,
                     message: 'Validation failed',
@@ -36,7 +36,7 @@ let ValidationPipe = class ValidationPipe extends common_1.ValidationPipe {
             },
         });
     }
-    flattenValidationErrors(errors) {
+    flattenErrors(errors) {
         const result = {};
         const extractErrors = (error, path = '') => {
             const propertyPath = path ? `${path}.${error.property}` : error.property;

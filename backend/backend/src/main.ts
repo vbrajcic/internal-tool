@@ -48,7 +48,7 @@ async function bootstrap() {
 
   // Trust proxy (for production behind load balancer)
   if (process.env.NODE_ENV === 'production') {
-    app.set('trust proxy', 1);
+    const expressApp = app.getHttpAdapter().getInstance(); expressApp.set('trust proxy', 1);
   }
 
   // Swagger documentation
