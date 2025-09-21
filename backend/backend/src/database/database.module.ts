@@ -7,20 +7,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        // Skip database connection if DATABASE_URL is not provided (Railway demo mode)
-        if (!configService.get('DATABASE_URL') && !configService.get('DB_HOST')) {
-          return {
-            type: 'sqlite',
-            database: ':memory:',
-            entities: [__dirname + '/../models/*.entity{.ts,.js}'],
-            synchronize: true,
-            logging: false,
-          };
-        }
-
-        return {
-          type: 'postgres',
-          url: configService.get('DATABASE_URL'),
+        const config = {
+          type: 'postgres' as const,
           host: configService.get('DB_HOST', 'localhost'),
           port: configService.get<number>('DB_PORT', 5432),
           username: configService.get('DB_USERNAME', 'postgres'),
@@ -30,11 +18,17 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           synchronize: configService.get('NODE_ENV') !== 'production',
           logging: configService.get('NODE_ENV') === 'development',
           ssl: configService.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
-          poolSize: 20,
           retryAttempts: 3,
           retryDelay: 3000,
           maxQueryExecutionTime: 10000,
         };
+
+        // Use DATABASE_URL if provided (Railway)
+        if (configService.get('DATABASE_URL')) {
+          (config as any).url = configService.get('DATABASE_URL');
+        }
+
+        return config;
       },
       inject: [ConfigService],
     }),

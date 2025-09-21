@@ -18,22 +18,27 @@ exports.DatabaseModule = DatabaseModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
-                useFactory: (configService) => ({
-                    type: 'postgres',
-                    host: configService.get('DB_HOST', 'localhost'),
-                    port: configService.get('DB_PORT', 5432),
-                    username: configService.get('DB_USERNAME', 'postgres'),
-                    password: configService.get('DB_PASSWORD', 'password'),
-                    database: configService.get('DB_NAME', 'asset_management'),
-                    entities: [__dirname + '/../models/*.entity{.ts,.js}'],
-                    synchronize: configService.get('NODE_ENV') !== 'production',
-                    logging: configService.get('NODE_ENV') === 'development',
-                    ssl: configService.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
-                    poolSize: 20,
-                    retryAttempts: 3,
-                    retryDelay: 3000,
-                    maxQueryExecutionTime: 10000,
-                }),
+                useFactory: (configService) => {
+                    const config = {
+                        type: 'postgres',
+                        host: configService.get('DB_HOST', 'localhost'),
+                        port: configService.get('DB_PORT', 5432),
+                        username: configService.get('DB_USERNAME', 'postgres'),
+                        password: configService.get('DB_PASSWORD', 'password'),
+                        database: configService.get('DB_NAME', 'asset_management'),
+                        entities: [__dirname + '/../models/*.entity{.ts,.js}'],
+                        synchronize: configService.get('NODE_ENV') !== 'production',
+                        logging: configService.get('NODE_ENV') === 'development',
+                        ssl: configService.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
+                        retryAttempts: 3,
+                        retryDelay: 3000,
+                        maxQueryExecutionTime: 10000,
+                    };
+                    if (configService.get('DATABASE_URL')) {
+                        config.url = configService.get('DATABASE_URL');
+                    }
+                    return config;
+                },
                 inject: [config_1.ConfigService],
             }),
         ],

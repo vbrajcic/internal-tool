@@ -26,7 +26,15 @@ async function bootstrap() {
         const document = swagger_1.SwaggerModule.createDocument(app, config);
         swagger_1.SwaggerModule.setup('api/docs', app, document);
         app.getHttpAdapter().get('/api/health', (req, res) => {
-            res.json({ status: 'ok', timestamp: new Date().toISOString() });
+            res.status(200).json({
+                status: 'ok',
+                timestamp: new Date().toISOString(),
+                uptime: process.uptime(),
+                memory: process.memoryUsage()
+            });
+        });
+        app.getHttpAdapter().get('/health', (req, res) => {
+            res.status(200).json({ status: 'ok' });
         });
         const port = process.env.PORT || 3001;
         const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
