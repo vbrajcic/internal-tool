@@ -67,9 +67,10 @@ async function bootstrap() {
         },
     });
     const port = process.env.PORT || 3001;
-    await app.listen(port);
-    logger.log(`🚀 Application is running on: http://localhost:${port}/api`);
-    logger.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
+    const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+    await app.listen(port, host);
+    logger.log(`🚀 Application is running on: http://${host}:${port}/api`);
+    logger.log(`📚 API Documentation: http://${host}:${port}/api/docs`);
     logger.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 }
 bootstrap().catch((error) => {

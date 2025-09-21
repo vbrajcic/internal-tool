@@ -39,9 +39,11 @@ async function bootstrap() {
     });
 
     const port = process.env.PORT || 3001;
-    await app.listen(port);
+    const host = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 
-    logger.log(`🚀 Application is running on: http://localhost:${port}/api`);
+    await app.listen(port, host);
+
+    logger.log(`🚀 Application is running on: http://${host}:${port}/api`);
     logger.log(`📚 API Documentation: http://localhost:${port}/api/docs`);
     logger.log(`❤️  Health Check: http://localhost:${port}/api/health`);
   } catch (error) {
