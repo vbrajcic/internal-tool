@@ -1,0 +1,8 @@
+[phases.install]
+cmds = ["npm ci --prefix backend/backend"]
+
+[phases.build]
+cmds = ["npm run build --prefix backend/backend"]
+
+[start]
+cmd = "npm run start:prod --prefix backend/backend"
