@@ -1,18 +1,13 @@
 {
   "framework": "vite",
-  "buildCommand": "cd frontend/frontend && npm ci && npm run build",
-  "outputDirectory": "frontend/frontend/dist",
-  "installCommand": "cd frontend/frontend && npm install",
-  "devCommand": "cd frontend/frontend && npm run dev",
+  "buildCommand": "npm ci && npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "devCommand": "npm run dev",
   "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "env": {
-    "VITE_API_URL": "@api_url",
-    "VITE_AUTH0_DOMAIN": "@auth0_domain",
-    "VITE_AUTH0_CLIENT_ID": "@auth0_client_id"
-  }
+  ]
 }
