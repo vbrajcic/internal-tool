@@ -1,19 +1,17 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { useAuth0 } from '@auth0/auth0-react';
-import AuthProviderWrapper from './providers/AuthProvider';
-import Layout from './components/Layout/Layout';
-import Dashboard from './pages/Dashboard';
-import EquipmentListPage from './pages/Equipment/EquipmentListPage';
-import EquipmentDetailPage from './pages/Equipment/EquipmentDetailPage';
-import SubscriptionListPage from './pages/Subscriptions/SubscriptionListPage';
-import RequestFormPage from './pages/Requests/RequestFormPage';
-import UserManagementPage from './pages/Admin/UserManagementPage';
-import QRScanPage from './components/Mobile/QRScanPage';
-import LoginPage from './components/Login/LoginPage';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
+import SimpleLayout from './components/Layout/SimpleLayout';
+import SimpleDashboard from './pages/SimpleDashboard';
+import SimpleLoginPage from './components/Login/SimpleLoginPage';
+import EquipmentPage from './pages/EquipmentPage';
+import SubscriptionsPage from './pages/SubscriptionsPage';
+import AdminPage from './pages/AdminPage';
+import RequestsPage from './pages/RequestsPage';
 
 const AppContent: React.FC = () => {
-  const { isLoading, isAuthenticated } = useAuth0();
+  const { isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) {
     return (
@@ -27,42 +25,32 @@ const AppContent: React.FC = () => {
   }
 
   if (!isAuthenticated) {
-    return <LoginPage />;
+    return <SimpleLoginPage />;
   }
 
   return (
     <Router>
-      <Layout>
+      <SimpleLayout>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-
-          {/* Equipment Routes */}
-          <Route path="/equipment" element={<EquipmentListPage />} />
-          <Route path="/equipment/:id" element={<EquipmentDetailPage />} />
-
-          {/* Subscription Routes */}
-          <Route path="/subscriptions" element={<SubscriptionListPage />} />
-
-          {/* Request Routes */}
-          <Route path="/requests/new" element={<RequestFormPage />} />
-
-          {/* Admin Routes */}
-          <Route path="/admin/users" element={<UserManagementPage />} />
-
-          {/* Mobile QR Scanning */}
-          <Route path="/qr-scan" element={<QRScanPage />} />
+          <Route path="/" element={<SimpleDashboard />} />
+          <Route path="/dashboard" element={<SimpleDashboard />} />
+          <Route path="/equipment" element={<EquipmentPage />} />
+          <Route path="/subscriptions" element={<SubscriptionsPage />} />
+          <Route path="/requests" element={<RequestsPage />} />
+          <Route path="/admin" element={<AdminPage />} />
         </Routes>
-      </Layout>
+      </SimpleLayout>
     </Router>
   );
 };
 
 function App() {
   return (
-    <AuthProviderWrapper>
-      <AppContent />
-    </AuthProviderWrapper>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
