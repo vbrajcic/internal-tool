@@ -95,8 +95,7 @@ const Modal: React.FC<ModalProps> = ({
                 onClick={onClose}
                 className="p-2 rounded-lg transition-colors hover:bg-gray-100"
                 style={{
-                  color: 'var(--color-gray-500)',
-                  ':hover': { backgroundColor: 'var(--color-gray-100)' }
+                  color: 'var(--color-gray-500)'
                 }}
                 aria-label="Close modal"
               >

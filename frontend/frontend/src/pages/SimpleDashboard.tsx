@@ -312,10 +312,7 @@ const SimpleDashboard: React.FC = () => {
                   className="w-full p-4 rounded-lg border-2 border-transparent hover:border-current transition-all text-left"
                   style={{
                     backgroundColor: 'var(--color-gray-50)',
-                    color: `var(--color-${action.color}-600)`,
-                    ':hover': {
-                      backgroundColor: `var(--color-${action.color}-50)`
-                    }
+                    color: `var(--color-${action.color}-600)`
                   }}
                 >
                   <div className="flex items-center space-x-4">
