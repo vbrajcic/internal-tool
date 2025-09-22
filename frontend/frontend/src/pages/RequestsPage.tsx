@@ -406,7 +406,7 @@ const RequestsPage: React.FC = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-heading-2 text-gray-900 dark:text-slate-100">Equipment Requests</h1>
+            <h1 className="text-lg sm:text-heading-2 text-gray-900 dark:text-slate-100">Equipment Requests</h1>
             <p className="text-body text-gray-600 dark:text-slate-400 mt-1">Submit and track equipment requests through the approval workflow</p>
           </div>
           <button

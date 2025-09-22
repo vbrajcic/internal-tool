@@ -238,7 +238,7 @@ const SimpleDashboard: React.FC = () => {
       <div className="space-y-8">
         {/* Welcome Section */}
         <div>
-          <h1 className="text-heading-1 mb-2">
+          <h1 className="text-xl sm:text-heading-1 mb-2">
             Welcome back, <span className="brand-accent">{user?.name}</span>
           </h1>
           <p className="text-body-lg" style={{ color: 'var(--color-gray-600)' }}>
@@ -278,7 +278,7 @@ const SimpleDashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recent Activity */}
           <div className="card p-6">
-            <h2 className="text-heading-3 mb-6">Recent Activity</h2>
+            <h2 className="text-lg sm:text-heading-3 mb-6">Recent Activity</h2>
             <div className="space-y-4">
               {recentActivity.map((activity, index) => (
                 <div key={index} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'var(--color-gray-50)' }}>
@@ -303,7 +303,7 @@ const SimpleDashboard: React.FC = () => {
 
           {/* Quick Actions */}
           <div className="card p-6">
-            <h2 className="text-heading-3 mb-6">Quick Actions</h2>
+            <h2 className="text-lg sm:text-heading-3 mb-6">Quick Actions</h2>
             <div className="space-y-4">
               {quickActions.map((action, index) => (
                 <button

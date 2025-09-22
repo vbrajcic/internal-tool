@@ -681,7 +681,7 @@ const EquipmentPage: React.FC = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-heading-2 text-gray-900 dark:text-slate-100">Equipment Management</h1>
+            <h1 className="text-lg sm:text-heading-2 text-gray-900 dark:text-slate-100">Equipment Management</h1>
             <p className="text-body text-gray-600 dark:text-slate-400 mt-1">Manage and track all company equipment</p>
           </div>
           {user?.role === 'admin' && (
