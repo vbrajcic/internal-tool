@@ -1,5 +1,18 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui/Table';
+import ActionMenu from '../components/ui/ActionMenu';
+import StatusBadge from '../components/ui/StatusBadge';
+import Modal from '../components/ui/Modal';
+import ModalFooter from '../components/ui/ModalFooter';
+import {
+  EyeIcon,
+  PencilIcon,
+  ArrowsRightLeftIcon,
+  ExclamationTriangleIcon,
+  TrashIcon,
+  PlusIcon
+} from '@heroicons/react/24/outline';
 
 interface Equipment {
   id: string;
@@ -140,24 +153,58 @@ const EquipmentPage: React.FC = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Available': return 'bg-green-100 text-green-800';
-      case 'Assigned': return 'bg-blue-100 text-blue-800';
-      case 'Maintenance': return 'bg-yellow-100 text-yellow-800';
-      case 'Retired': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  // Action menu items for each equipment
+  const getActionItems = (item: Equipment) => {
+    const actions = [
+      {
+        id: 'view',
+        label: 'View Details',
+        icon: <EyeIcon className="h-4 w-4" />,
+        onClick: () => handleView(item)
+      }
+    ];
 
-  const getConditionColor = (condition: string) => {
-    switch (condition) {
-      case 'New': return 'bg-green-100 text-green-800';
-      case 'Good': return 'bg-blue-100 text-blue-800';
-      case 'Fair': return 'bg-yellow-100 text-yellow-800';
-      case 'Poor': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+    // Add Report Issue for assigned users
+    if (item.assignedTo === user?.name) {
+      actions.push({
+        id: 'report',
+        label: 'Report Issue',
+        icon: <ExclamationTriangleIcon className="h-4 w-4" />,
+        onClick: () => handleConditionReport(item)
+      });
     }
+
+    // Add Transfer for admins and team leads on assigned equipment
+    if ((user?.role === 'admin' || user?.role === 'teamlead') && item.status === 'Assigned') {
+      actions.push({
+        id: 'transfer',
+        label: 'Transfer',
+        icon: <ArrowsRightLeftIcon className="h-4 w-4" />,
+        onClick: () => handleTransfer(item)
+      });
+    }
+
+    // Add Edit for admins and team leads
+    if (user?.role === 'admin' || user?.role === 'teamlead') {
+      actions.push({
+        id: 'edit',
+        label: 'Edit',
+        icon: <PencilIcon className="h-4 w-4" />,
+        onClick: () => handleEdit(item)
+      });
+    }
+
+    // Add Delete for admins only
+    if (user?.role === 'admin') {
+      actions.push({
+        id: 'delete',
+        label: 'Delete',
+        icon: <TrashIcon className="h-4 w-4" />,
+        onClick: () => handleDelete(item)
+      });
+    }
+
+    return actions;
   };
 
   const handleView = (item: Equipment) => {
@@ -190,132 +237,210 @@ const EquipmentPage: React.FC = () => {
   return (
     <>
       {/* Add Equipment Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg max-w-lg w-full mx-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-4">Add New Equipment</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Equipment Name</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" placeholder="e.g., Dell Laptop" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Serial Number</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" placeholder="e.g., DL12345" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Type</label>
-                <select className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100">
-                  <option>Laptop</option>
-                  <option>Desktop</option>
-                  <option>Monitor</option>
-                  <option>Phone</option>
-                  <option>Tablet</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Brand</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" placeholder="e.g., Dell" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Model</label>
-                <input type="text" className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" placeholder="e.g., XPS 13" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Purchase Date</label>
-                <input type="date" className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100" />
-              </div>
-            </div>
-            <div className="flex space-x-3 mt-6">
-              <button
-                onClick={() => {
-                  alert('Equipment added successfully!');
-                  setShowAddModal(false);
-                }}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Add Equipment
-              </button>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="flex-1 bg-gray-300 dark:bg-slate-600 text-gray-700 dark:text-slate-200 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Add New Equipment"
+        size="lg"
+      >
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>
+              Equipment Name
+            </label>
+            <input
+              type="text"
+              className="input-primary"
+              placeholder="e.g., Dell Laptop"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>
+              Serial Number
+            </label>
+            <input
+              type="text"
+              className="input-primary"
+              placeholder="e.g., DL12345"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>
+              Type
+            </label>
+            <select className="input-primary">
+              <option>Laptop</option>
+              <option>Desktop</option>
+              <option>Monitor</option>
+              <option>Phone</option>
+              <option>Tablet</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>
+              Brand
+            </label>
+            <input
+              type="text"
+              className="input-primary"
+              placeholder="e.g., Dell"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>
+              Model
+            </label>
+            <input
+              type="text"
+              className="input-primary"
+              placeholder="e.g., XPS 13"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>
+              Purchase Date
+            </label>
+            <input
+              type="date"
+              className="input-primary"
+            />
           </div>
         </div>
-      )}
+
+        <ModalFooter>
+          <button
+            onClick={() => setShowAddModal(false)}
+            className="btn-secondary"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              alert('Equipment added successfully!');
+              setShowAddModal(false);
+            }}
+            className="btn-primary"
+          >
+            Add Equipment
+          </button>
+        </ModalFooter>
+      </Modal>
 
       {/* View Equipment Modal */}
-      {showViewModal && selectedEquipment && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-lg max-w-lg w-full mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100">Equipment Details</h3>
-              <button
-                onClick={() => setShowViewModal(false)}
-                className="text-gray-400 dark:text-slate-400 hover:text-gray-600 dark:hover:text-slate-300"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Name</label>
-                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{selectedEquipment.name}</div>
+      <Modal
+        isOpen={showViewModal && !!selectedEquipment}
+        onClose={() => setShowViewModal(false)}
+        title="Equipment Details"
+        size="lg"
+      >
+        {selectedEquipment && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-500)' }}>
+                  Equipment Name
+                </label>
+                <div className="text-body font-medium" style={{ color: 'var(--color-gray-900)' }}>
+                  {selectedEquipment.name}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Serial Number</label>
-                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{selectedEquipment.serialNumber}</div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-500)' }}>
+                  Serial Number
+                </label>
+                <div className="text-body font-mono" style={{ color: 'var(--color-gray-900)' }}>
+                  {selectedEquipment.serialNumber}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Type</label>
-                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{selectedEquipment.type}</div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-500)' }}>
+                  Type
+                </label>
+                <div className="text-body" style={{ color: 'var(--color-gray-900)' }}>
+                  {selectedEquipment.type}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Brand</label>
-                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{selectedEquipment.brand}</div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-500)' }}>
+                  Brand & Model
+                </label>
+                <div className="text-body" style={{ color: 'var(--color-gray-900)' }}>
+                  {selectedEquipment.brand} {selectedEquipment.model}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Model</label>
-                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{selectedEquipment.model}</div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-500)' }}>
+                  Status
+                </label>
+                <div className="mt-1">
+                  <StatusBadge status={selectedEquipment.status} size="sm" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Status</label>
-                  <div className="mt-1">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(selectedEquipment.status)}`}>
-                      {selectedEquipment.status}
-                    </span>
-                  </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-500)' }}>
+                  Condition
+                </label>
+                <div className="mt-1">
+                  <StatusBadge status={selectedEquipment.condition} size="sm" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Purchase Date</label>
-                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{new Date(selectedEquipment.purchaseDate).toLocaleDateString()}</div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-500)' }}>
+                  Purchase Date
+                </label>
+                <div className="text-body" style={{ color: 'var(--color-gray-900)' }}>
+                  {new Date(selectedEquipment.purchaseDate).toLocaleDateString()}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Assigned To</label>
-                  <div className="mt-1 text-sm text-gray-900 dark:text-slate-100">{selectedEquipment.assignedTo || 'Not assigned'}</div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">QR Code</label>
-                  <div className="mt-1 text-sm text-gray-900 font-mono">{selectedEquipment.qrCode}</div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-500)' }}>
+                  Assigned To
+                </label>
+                <div className="text-body" style={{ color: selectedEquipment.assignedTo ? 'var(--color-gray-900)' : 'var(--color-gray-500)' }}>
+                  {selectedEquipment.assignedTo || 'Not assigned'}
                 </div>
               </div>
             </div>
-            <div className="flex justify-end mt-6">
-              <button
-                onClick={() => setShowViewModal(false)}
-                className="bg-gray-300 dark:bg-slate-600 text-gray-700 dark:text-slate-200 py-2 px-4 rounded-md hover:bg-gray-400 dark:hover:bg-slate-500 transition-colors"
-              >
-                Close
-              </button>
+
+            {selectedEquipment.notes && (
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-500)' }}>
+                  Notes
+                </label>
+                <div className="p-3 rounded-md text-body" style={{
+                  backgroundColor: 'var(--color-gray-50)',
+                  color: 'var(--color-gray-700)'
+                }}>
+                  {selectedEquipment.notes}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-500)' }}>
+                QR Code
+              </label>
+              <div className="p-3 rounded-md font-mono text-sm" style={{
+                backgroundColor: 'var(--color-primary-50)',
+                color: 'var(--color-primary-700)',
+                border: '1px solid var(--color-primary-200)'
+              }}>
+                {selectedEquipment.qrCode}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        <ModalFooter>
+          <button
+            onClick={() => setShowViewModal(false)}
+            className="btn-secondary"
+          >
+            Close
+          </button>
+        </ModalFooter>
+      </Modal>
 
       {/* Edit Equipment Modal */}
       {showEditModal && selectedEquipment && (
@@ -485,14 +610,7 @@ const EquipmentPage: React.FC = () => {
               <div className="text-sm text-gray-500 dark:text-slate-400">Serial: {selectedEquipment.serialNumber}</div>
               <div className="flex items-center mt-2">
                 <span className="text-sm text-gray-500 mr-2">Current Condition:</span>
-                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  selectedEquipment.condition === 'New' ? 'bg-green-100 text-green-800' :
-                  selectedEquipment.condition === 'Good' ? 'bg-blue-100 text-blue-800' :
-                  selectedEquipment.condition === 'Fair' ? 'bg-yellow-100 text-yellow-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {selectedEquipment.condition}
-                </span>
+                <StatusBadge status={selectedEquipment.condition} size="sm" />
               </div>
               {selectedEquipment.notes && (
                 <div className="text-sm text-gray-500 mt-2">Notes: {selectedEquipment.notes}</div>
@@ -563,21 +681,22 @@ const EquipmentPage: React.FC = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-light text-gray-900 dark:text-slate-100">Equipment Management</h1>
-            <p className="text-gray-600 dark:text-slate-400">Manage and track all company equipment</p>
+            <h1 className="text-heading-2 text-gray-900 dark:text-slate-100">Equipment Management</h1>
+            <p className="text-body text-gray-600 dark:text-slate-400 mt-1">Manage and track all company equipment</p>
           </div>
           {user?.role === 'admin' && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              className="btn-primary inline-flex items-center space-x-2"
             >
-              Add Equipment
+              <PlusIcon className="h-4 w-4" />
+              <span>Add Equipment</span>
             </button>
           )}
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm">
+        <div className="card p-6">
           <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
             <div className="flex-1">
               <input
@@ -585,14 +704,14 @@ const EquipmentPage: React.FC = () => {
                 placeholder="Search equipment by name, serial number, or brand..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 transition-all duration-150"
               />
             </div>
             <div>
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-w-[120px] transition-all duration-150"
               >
                 <option>All</option>
                 <option>Available</option>
@@ -605,102 +724,57 @@ const EquipmentPage: React.FC = () => {
         </div>
 
         {/* Equipment List */}
-        <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50 dark:bg-slate-700">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Equipment</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Serial Number</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Condition</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Assigned To</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
-                {filteredEquipment.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-slate-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900 dark:text-slate-100">{item.name}</div>
-                        <div className="text-sm text-gray-500 dark:text-slate-400">{item.brand} {item.model}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-slate-100">
-                      {item.serialNumber}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-slate-100">
-                      {item.type}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getConditionColor(item.condition)}`}>
-                        {item.condition}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-slate-100">
-                      {item.assignedTo || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleView(item)}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                      >
-                        View
-                      </button>
-                      {item.assignedTo === user?.name && (
-                        <button
-                          onClick={() => handleConditionReport(item)}
-                          className="text-orange-600 hover:text-orange-900 mr-3"
-                        >
-                          Report Issue
-                        </button>
-                      )}
-                      {(user?.role === 'admin' || user?.role === 'teamlead') && item.status === 'Assigned' && (
-                        <button
-                          onClick={() => handleTransfer(item)}
-                          className="text-purple-600 hover:text-purple-900 mr-3"
-                        >
-                          Transfer
-                        </button>
-                      )}
-                      {user?.role === 'admin' && (
-                        <>
-                          <button
-                            onClick={() => handleEdit(item)}
-                            className="text-green-600 hover:text-green-900 mr-3"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Delete
-                          </button>
-                        </>
-                      )}
-                      {user?.role === 'teamlead' && (
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="text-green-600 hover:text-green-900"
-                        >
-                          Edit
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Equipment</TableHead>
+              <TableHead>Serial Number</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Condition</TableHead>
+              <TableHead>Assigned To</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredEquipment.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">{item.name}</div>
+                    <div className="text-sm text-gray-500 dark:text-slate-400">{item.brand} {item.model}</div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm font-mono text-gray-700 dark:text-slate-300">{item.serialNumber}</span>
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm text-gray-900 dark:text-slate-100">{item.type}</span>
+                </TableCell>
+                <TableCell>
+                  <StatusBadge status={item.status} size="sm" />
+                </TableCell>
+                <TableCell>
+                  <StatusBadge status={item.condition} size="sm" />
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm text-gray-900 dark:text-slate-100">
+                    {item.assignedTo || (
+                      <span className="text-gray-400 italic">Unassigned</span>
+                    )}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">
+                  <ActionMenu
+                    actions={getActionItems(item)}
+                    align="right"
+                    size="sm"
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         {filteredEquipment.length === 0 && (
           <div className="text-center py-12">

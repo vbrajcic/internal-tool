@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
 
 interface SimpleLayoutProps {
   children: ReactNode;
@@ -9,7 +8,6 @@ interface SimpleLayoutProps {
 
 const SimpleLayout: React.FC<SimpleLayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
 
   const isActive = (path: string) => {
@@ -27,62 +25,44 @@ const SimpleLayout: React.FC<SimpleLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-gray-50)' }}>
       {/* Header */}
-      <header className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 shadow-sm">
+      <header className="bg-white border-b shadow-sm" style={{ borderColor: 'var(--color-gray-200)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo & Title */}
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary-600 dark:bg-primary-500 rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{
+                background: 'linear-gradient(135deg, var(--color-primary-500), var(--color-success-500))'
+              }}>
                 <span className="text-white font-bold text-sm">AM</span>
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-slate-100">
-                  Asset Management
+                <h1 className="text-xl font-semibold" style={{ color: 'var(--color-gray-950)' }}>
+                  <span className="brand-accent">Asset</span> Management
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-slate-400">Enterprise Solution</p>
+                <p className="text-xs" style={{ color: 'var(--color-gray-500)' }}>
+                  Powered by Profico
+                </p>
               </div>
             </div>
 
             {/* Right Side */}
             <div className="flex items-center space-x-4">
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className="p-2 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 border border-gray-300 dark:border-slate-600"
-                title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                <div className="w-4 h-4 relative">
-                  {isDark ? (
-                    // Light mode icon (sun)
-                    <div className="w-full h-full rounded-full bg-yellow-400 relative">
-                      <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-0.5 h-1 bg-yellow-400"></div>
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0.5 h-1 bg-yellow-400"></div>
-                      <div className="absolute -left-1 top-1/2 transform -translate-y-1/2 w-1 h-0.5 bg-yellow-400"></div>
-                      <div className="absolute -right-1 top-1/2 transform -translate-y-1/2 w-1 h-0.5 bg-yellow-400"></div>
-                    </div>
-                  ) : (
-                    // Dark mode icon (moon)
-                    <div className="w-full h-full rounded-full bg-gray-600 relative overflow-hidden">
-                      <div className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-gray-50"></div>
-                    </div>
-                  )}
-                </div>
-              </button>
-
               {/* User Info */}
               <div className="flex items-center space-x-3">
                 <div className="text-right">
-                  <div className="text-sm font-medium text-gray-900 dark:text-slate-100">
+                  <div className="text-sm font-medium" style={{ color: 'var(--color-gray-900)' }}>
                     {user?.name}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-slate-400 capitalize">
+                  <div className="text-xs capitalize" style={{ color: 'var(--color-gray-500)' }}>
                     {user?.role}
                   </div>
                 </div>
-                <div className="w-8 h-8 bg-gray-300 dark:bg-slate-700 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-gray-600 dark:text-slate-200">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{
+                  backgroundColor: 'var(--color-primary-100)'
+                }}>
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-primary-700)' }}>
                     {user?.name?.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -91,7 +71,8 @@ const SimpleLayout: React.FC<SimpleLayoutProps> = ({ children }) => {
               {/* Sign Out */}
               <button
                 onClick={logout}
-                className="text-sm text-gray-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+                className="text-sm px-3 py-2 rounded-lg transition-colors btn-secondary"
+                style={{ color: 'var(--color-gray-600)' }}
               >
                 Sign out
               </button>
@@ -101,7 +82,7 @@ const SimpleLayout: React.FC<SimpleLayoutProps> = ({ children }) => {
       </header>
 
       {/* Navigation */}
-      <nav className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 shadow-sm">
+      <nav className="bg-white border-b shadow-sm" style={{ borderColor: 'var(--color-gray-200)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-1 h-14 items-center">
             {navigationItems.map((item) => (
@@ -110,15 +91,25 @@ const SimpleLayout: React.FC<SimpleLayoutProps> = ({ children }) => {
                 to={item.path}
                 className={`
                   px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative
+                  focus:outline-none
                   ${isActive(item.path)
-                    ? 'bg-primary-600 text-white shadow-lg shadow-primary-600/25 dark:shadow-primary-500/25'
-                    : 'text-gray-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-slate-800'
+                    ? 'text-white'
+                    : 'hover:bg-gray-50'
                   }
                 `}
+                style={isActive(item.path) ? {
+                  backgroundColor: 'var(--color-primary-500)',
+                  color: 'white'
+                } : {
+                  color: 'var(--color-gray-600)'
+                }}
               >
                 {item.label}
                 {isActive(item.path) && (
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full"></div>
+                  <div
+                    className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full"
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
+                  ></div>
                 )}
               </Link>
             ))}
@@ -134,14 +125,14 @@ const SimpleLayout: React.FC<SimpleLayoutProps> = ({ children }) => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-700 mt-auto">
+      <footer className="bg-white border-t mt-auto" style={{ borderColor: 'var(--color-gray-200)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center text-sm text-gray-500 dark:text-slate-400">
+          <div className="flex justify-between items-center text-sm" style={{ color: 'var(--color-gray-500)' }}>
             <div>© 2025 Asset Management System. All rights reserved.</div>
             <div className="flex space-x-4">
               <span>Version 1.0.0</span>
               <span>•</span>
-              <span>Last updated: September 2025</span>
+              <span className="brand-accent">Powered by Profico</span>
             </div>
           </div>
         </div>

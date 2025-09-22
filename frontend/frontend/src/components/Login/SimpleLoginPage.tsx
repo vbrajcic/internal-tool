@@ -18,13 +18,20 @@ const SimpleLoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: 'var(--color-gray-50)' }}>
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="text-3xl font-light text-gray-900 mb-2">
-            Asset Management
+          <div className="mb-6">
+            <h1 className="text-4xl font-bold mb-2">
+              <span className="brand-gradient">Asset</span>
+              <span style={{ color: 'var(--color-gray-950)' }}> Management</span>
+            </h1>
+            <div className="w-16 h-1 mx-auto" style={{ background: 'linear-gradient(90deg, var(--color-primary-500), var(--color-success-500))' }}></div>
+          </div>
+          <h2 className="text-heading-3" style={{ color: 'var(--color-gray-700)' }}>
+            Welcome back
           </h2>
-          <p className="text-sm text-gray-600">
+          <p className="text-body-sm mt-2">
             Sign in to access your dashboard
           </p>
         </div>
@@ -40,7 +47,7 @@ const SimpleLoginPage: React.FC = () => {
                 name="email"
                 type="email"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input-primary"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -56,7 +63,7 @@ const SimpleLoginPage: React.FC = () => {
                 name="password"
                 type="password"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input-primary"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -65,7 +72,11 @@ const SimpleLoginPage: React.FC = () => {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-md text-sm">
+            <div style={{
+              backgroundColor: 'var(--color-error-50)',
+              borderColor: 'var(--color-error-200)',
+              color: 'var(--color-error-700)'
+            }} className="border px-3 py-2 rounded-md text-sm">
               {error}
             </div>
           )}
@@ -73,7 +84,7 @@ const SimpleLoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full btn-primary py-3 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <div className="flex items-center">
@@ -85,13 +96,35 @@ const SimpleLoginPage: React.FC = () => {
             )}
           </button>
 
-          <div className="mt-6 bg-gray-100 p-4 rounded-md">
-            <h3 className="text-sm font-medium text-gray-900 mb-2">Demo Accounts:</h3>
-            <div className="text-xs text-gray-600 space-y-1">
-              <p>• admin@company.com (Admin)</p>
-              <p>• teamlead@company.com (Team Lead)</p>
-              <p>• employee@company.com (Employee)</p>
-              <p className="font-medium mt-2">Password: demo123</p>
+          <div className="mt-6 p-4 rounded-md card">
+            <h3 className="text-sm font-medium mb-3" style={{ color: 'var(--color-gray-900)' }}>
+              <span className="brand-accent">Demo Accounts</span>
+            </h3>
+            <div className="text-xs space-y-2" style={{ color: 'var(--color-gray-600)' }}>
+              <div className="flex items-center justify-between">
+                <span>• admin@company.com</span>
+                <span className="text-xs px-2 py-0.5 rounded" style={{
+                  backgroundColor: 'var(--color-primary-100)',
+                  color: 'var(--color-primary-700)'
+                }}>Admin</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>• teamlead@company.com</span>
+                <span className="text-xs px-2 py-0.5 rounded" style={{
+                  backgroundColor: 'var(--color-success-100)',
+                  color: 'var(--color-success-700)'
+                }}>Team Lead</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span>• employee@company.com</span>
+                <span className="text-xs px-2 py-0.5 rounded" style={{
+                  backgroundColor: 'var(--color-warning-100)',
+                  color: 'var(--color-warning-700)'
+                }}>Employee</span>
+              </div>
+              <div className="pt-2 border-t" style={{ borderColor: 'var(--color-gray-200)' }}>
+                <p className="font-medium" style={{ color: 'var(--color-gray-700)' }}>Password: demo123</p>
+              </div>
             </div>
           </div>
         </form>
