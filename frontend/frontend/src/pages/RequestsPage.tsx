@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../components/ui/Table';
+import ActionMenu from '../components/ui/ActionMenu';
+import StatusBadge from '../components/ui/StatusBadge';
+import Modal from '../components/ui/Modal';
+import ModalFooter from '../components/ui/ModalFooter';
+import {
+  EyeIcon,
+  CheckIcon,
+  PlusIcon,
+  UserGroupIcon
+} from '@heroicons/react/24/outline';
 
 interface Request {
   id: string;
@@ -21,9 +32,12 @@ const RequestsPage: React.FC = () => {
   const { user } = useAuth();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
   const [reviewDecision, setReviewDecision] = useState<'Approved' | 'Rejected'>('Approved');
   const [reviewNotes, setReviewNotes] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
 
   // Mock requests data
   const [requests] = useState<Request[]>([
@@ -92,16 +106,40 @@ const RequestsPage: React.FC = () => {
     }
   }, [requests, user]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Submitted': return 'bg-blue-100 text-blue-800';
-      case 'TeamLeadReview': return 'bg-yellow-100 text-yellow-800';
-      case 'AdminReview': return 'bg-orange-100 text-orange-800';
-      case 'Approved': return 'bg-green-100 text-green-800';
-      case 'Rejected': return 'bg-red-100 text-red-800';
-      case 'Fulfilled': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const filteredRequests = visibleRequests.filter(request => {
+    const matchesSearch = request.equipmentType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         request.requesterName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         request.justification.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === 'All' || request.status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
+
+  // Action menu items for each request
+  const getActionItems = (request: Request) => {
+    const actions = [
+      {
+        id: 'view',
+        label: 'View Details',
+        icon: <EyeIcon className="h-4 w-4" />,
+        onClick: () => handleViewDetails(request)
+      }
+    ];
+
+    if (canReview(request)) {
+      actions.unshift({
+        id: 'review',
+        label: user?.role === 'teamlead' ? 'Review' : 'Admin Review',
+        icon: user?.role === 'teamlead' ? <UserGroupIcon className="h-4 w-4" /> : <CheckIcon className="h-4 w-4" />,
+        onClick: () => handleReview(request)
+      });
     }
+
+    return actions;
+  };
+
+  const handleViewDetails = (request: Request) => {
+    setSelectedRequest(request);
+    setShowViewModal(true);
   };
 
   const canReview = (request: Request) => {
@@ -135,243 +173,347 @@ const RequestsPage: React.FC = () => {
   return (
     <>
       {/* Create Request Modal */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Create Equipment Request</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Equipment Type</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option>Laptop</option>
-                  <option>Desktop</option>
-                  <option>Monitor</option>
-                  <option>Phone</option>
-                  <option>Tablet</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Business Justification</label>
-                <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={4}
-                  placeholder="Explain why you need this equipment for your work..."
-                  required
-                ></textarea>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Specifications (Optional)</label>
-                <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={2}
-                  placeholder="Any specific requirements or preferences..."
-                ></textarea>
-              </div>
-            </div>
-            <div className="flex space-x-3 mt-6">
-              <button
-                onClick={() => {
-                  alert('Request submitted successfully! Your team lead will review it shortly.');
-                  setShowCreateModal(false);
-                }}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Submit Request
-              </button>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
+      <Modal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        title="Create Equipment Request"
+        size="lg"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>
+              Equipment Type
+            </label>
+            <select className="input-primary">
+              <option>Laptop</option>
+              <option>Desktop</option>
+              <option>Monitor</option>
+              <option>Phone</option>
+              <option>Tablet</option>
+              <option>Software License</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>
+              Business Justification
+            </label>
+            <textarea
+              className="input-primary"
+              rows={4}
+              placeholder="Explain why you need this equipment for your work..."
+              required
+              style={{ resize: 'vertical', minHeight: '100px' }}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>
+              Specifications (Optional)
+            </label>
+            <textarea
+              className="input-primary"
+              rows={2}
+              placeholder="Any specific requirements or preferences..."
+              style={{ resize: 'vertical', minHeight: '60px' }}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>
+              Priority
+            </label>
+            <select className="input-primary">
+              <option>Low</option>
+              <option>Medium</option>
+              <option>High</option>
+              <option>Urgent</option>
+            </select>
           </div>
         </div>
-      )}
+
+        <ModalFooter>
+          <button onClick={() => setShowCreateModal(false)} className="btn-secondary">
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              alert('Request submitted successfully! Your team lead will review it shortly.');
+              setShowCreateModal(false);
+            }}
+            className="btn-primary"
+          >
+            Submit Request
+          </button>
+        </ModalFooter>
+      </Modal>
 
       {/* Review Request Modal */}
-      {showReviewModal && selectedRequest && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full mx-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              {user?.role === 'teamlead' ? 'Team Lead Review' : 'Admin Review'}
-            </h3>
-            <div className="space-y-4">
+      <Modal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        title={user?.role === 'teamlead' ? 'Team Lead Review' : 'Admin Review'}
+        size="lg"
+      >
+        {selectedRequest && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Requester</label>
-                <div className="mt-1 text-sm text-gray-900">{selectedRequest.requesterName}</div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-700)' }}>Requester</label>
+                <div className="text-body" style={{ color: 'var(--color-gray-900)' }}>{selectedRequest.requesterName}</div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Equipment Type</label>
-                <div className="mt-1 text-sm text-gray-900">{selectedRequest.equipmentType}</div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Justification</label>
-                <div className="mt-1 text-sm text-gray-900 bg-gray-50 p-3 rounded border">
-                  {selectedRequest.justification}
-                </div>
-              </div>
-              {selectedRequest.teamLeadNotes && user?.role === 'admin' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Team Lead Notes</label>
-                  <div className="mt-1 text-sm text-gray-900 bg-blue-50 p-3 rounded border">
-                    {selectedRequest.teamLeadNotes}
-                  </div>
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Decision</label>
-                <select
-                  value={reviewDecision}
-                  onChange={(e) => setReviewDecision(e.target.value as 'Approved' | 'Rejected')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="Approved">Approve</option>
-                  <option value="Rejected">Reject</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Review Notes {reviewDecision === 'Rejected' && <span className="text-red-500">(Required for rejection)</span>}
-                </label>
-                <textarea
-                  value={reviewNotes}
-                  onChange={(e) => setReviewNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                  placeholder={reviewDecision === 'Approved' ? 'Optional notes...' : 'Explain why this request is being rejected...'}
-                  required={reviewDecision === 'Rejected'}
-                ></textarea>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-700)' }}>Equipment Type</label>
+                <div className="text-body" style={{ color: 'var(--color-gray-900)' }}>{selectedRequest.equipmentType}</div>
               </div>
             </div>
-            <div className="flex space-x-3 mt-6">
-              <button
-                onClick={submitReview}
-                disabled={reviewDecision === 'Rejected' && !reviewNotes.trim()}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>Justification</label>
+              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-gray-50)', color: 'var(--color-gray-900)' }}>
+                {selectedRequest.justification}
+              </div>
+            </div>
+            {selectedRequest.teamLeadNotes && user?.role === 'admin' && (
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>Team Lead Notes</label>
+                <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-primary-50)', color: 'var(--color-gray-900)' }}>
+                  {selectedRequest.teamLeadNotes}
+                </div>
+              </div>
+            )}
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>Decision</label>
+              <select
+                value={reviewDecision}
+                onChange={(e) => setReviewDecision(e.target.value as 'Approved' | 'Rejected')}
+                className="input-primary"
               >
-                Submit Review
-              </button>
-              <button
-                onClick={() => setShowReviewModal(false)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 transition-colors"
-              >
-                Cancel
-              </button>
+                <option value="Approved">Approve</option>
+                <option value="Rejected">Reject</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>
+                Review Notes {reviewDecision === 'Rejected' && <span style={{ color: 'var(--color-error-600)' }}>(Required for rejection)</span>}
+              </label>
+              <textarea
+                value={reviewNotes}
+                onChange={(e) => setReviewNotes(e.target.value)}
+                className="input-primary"
+                rows={3}
+                placeholder={reviewDecision === 'Approved' ? 'Optional notes...' : 'Explain why this request is being rejected...'}
+                required={reviewDecision === 'Rejected'}
+                style={{ resize: 'vertical', minHeight: '80px' }}
+              />
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        <ModalFooter>
+          <button onClick={() => setShowReviewModal(false)} className="btn-secondary">
+            Cancel
+          </button>
+          <button
+            onClick={submitReview}
+            disabled={reviewDecision === 'Rejected' && !reviewNotes.trim()}
+            className={reviewDecision === 'Approved' ? 'btn-success' : 'btn-secondary'}
+            style={reviewDecision === 'Rejected' && !reviewNotes.trim() ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+          >
+            {reviewDecision === 'Approved' ? 'Approve Request' : 'Reject Request'}
+          </button>
+        </ModalFooter>
+      </Modal>
+
+      {/* View Details Modal */}
+      <Modal
+        isOpen={showViewModal}
+        onClose={() => setShowViewModal(false)}
+        title="Request Details"
+        size="lg"
+      >
+        {selectedRequest && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-700)' }}>Requester</label>
+                <div className="text-body" style={{ color: 'var(--color-gray-900)' }}>{selectedRequest.requesterName}</div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-700)' }}>Equipment Type</label>
+                <div className="text-body" style={{ color: 'var(--color-gray-900)' }}>{selectedRequest.equipmentType}</div>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-700)' }}>Status</label>
+              <StatusBadge status={selectedRequest.status} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>Justification</label>
+              <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-gray-50)', color: 'var(--color-gray-900)' }}>
+                {selectedRequest.justification}
+              </div>
+            </div>
+            {selectedRequest.teamLeadNotes && (
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>Team Lead Notes</label>
+                <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-primary-50)', color: 'var(--color-gray-900)' }}>
+                  {selectedRequest.teamLeadNotes}
+                </div>
+              </div>
+            )}
+            {selectedRequest.adminNotes && (
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>Admin Notes</label>
+                <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-success-50)', color: 'var(--color-gray-900)' }}>
+                  {selectedRequest.adminNotes}
+                </div>
+              </div>
+            )}
+            {selectedRequest.rejectionReason && (
+              <div>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-gray-700)' }}>Rejection Reason</label>
+                <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--color-error-50)', color: 'var(--color-gray-900)' }}>
+                  {selectedRequest.rejectionReason}
+                </div>
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-700)' }}>Requested</label>
+                <div style={{ color: 'var(--color-gray-600)' }}>{new Date(selectedRequest.requestedAt).toLocaleDateString()}</div>
+              </div>
+              {selectedRequest.teamLeadReviewedAt && (
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-700)' }}>Team Lead Review</label>
+                  <div style={{ color: 'var(--color-gray-600)' }}>{new Date(selectedRequest.teamLeadReviewedAt).toLocaleDateString()}</div>
+                </div>
+              )}
+              {selectedRequest.adminReviewedAt && (
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: 'var(--color-gray-700)' }}>Admin Review</label>
+                  <div style={{ color: 'var(--color-gray-600)' }}>{new Date(selectedRequest.adminReviewedAt).toLocaleDateString()}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <ModalFooter>
+          <button onClick={() => setShowViewModal(false)} className="btn-secondary">
+            Close
+          </button>
+        </ModalFooter>
+      </Modal>
 
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-light text-gray-900">Equipment Requests</h1>
-            <p className="text-gray-600">Submit and track equipment requests</p>
+            <h1 className="text-heading-2 text-gray-900 dark:text-slate-100">Equipment Requests</h1>
+            <p className="text-body text-gray-600 dark:text-slate-400 mt-1">Submit and track equipment requests through the approval workflow</p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            className="btn-primary inline-flex items-center space-x-2"
           >
-            New Request
+            <PlusIcon className="h-4 w-4" />
+            <span>New Request</span>
           </button>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div className="text-2xl font-light text-gray-900 mb-1">
-              {visibleRequests.filter(r => r.status === 'TeamLeadReview').length}
+        {/* Filters and Search */}
+        <div className="card p-6">
+          <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-4">
+            <div className="flex-1">
+              <input
+                type="text"
+                placeholder="Search requests by equipment type, requester, or justification..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 transition-all duration-150"
+              />
             </div>
-            <div className="text-sm font-medium text-gray-900 mb-1">Pending Team Lead</div>
-            <div className="text-xs text-gray-500">Awaiting review</div>
-          </div>
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div className="text-2xl font-light text-gray-900 mb-1">
-              {visibleRequests.filter(r => r.status === 'AdminReview').length}
+            <div>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-w-[120px] transition-all duration-150"
+              >
+                <option>All</option>
+                <option>Submitted</option>
+                <option>TeamLeadReview</option>
+                <option>AdminReview</option>
+                <option>Approved</option>
+                <option>Rejected</option>
+                <option>Fulfilled</option>
+              </select>
             </div>
-            <div className="text-sm font-medium text-gray-900 mb-1">Pending Admin</div>
-            <div className="text-xs text-gray-500">Final approval needed</div>
-          </div>
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div className="text-2xl font-light text-gray-900 mb-1">
-              {visibleRequests.filter(r => r.status === 'Approved').length}
-            </div>
-            <div className="text-sm font-medium text-gray-900 mb-1">Approved</div>
-            <div className="text-xs text-gray-500">Ready for ordering</div>
-          </div>
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <div className="text-2xl font-light text-gray-900 mb-1">
-              {visibleRequests.filter(r => r.status === 'Rejected').length}
-            </div>
-            <div className="text-sm font-medium text-gray-900 mb-1">Rejected</div>
-            <div className="text-xs text-gray-500">Not approved</div>
           </div>
         </div>
 
         {/* Requests List */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team Lead</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Admin</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {visibleRequests.map((request) => (
-                  <tr key={request.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{request.equipmentType}</div>
-                        <div className="text-sm text-gray-500">by {request.requesterName}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(request.status)}`}>
-                        {request.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {request.teamLeadDecision || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {request.adminDecision || '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(request.requestedAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      {canReview(request) && (
-                        <button
-                          onClick={() => handleReview(request)}
-                          className="text-blue-600 hover:text-blue-900 mr-3"
-                        >
-                          Review
-                        </button>
-                      )}
-                      <button className="text-gray-600 hover:text-gray-900">
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Request</TableHead>
+              <TableHead>Requester</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Team Lead</TableHead>
+              <TableHead>Admin</TableHead>
+              <TableHead>Requested Date</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredRequests.map((request) => (
+              <TableRow key={request.id}>
+                <TableCell>
+                  <div>
+                    <div className="text-sm font-semibold text-gray-900 dark:text-slate-100">{request.equipmentType}</div>
+                    <div className="text-sm text-gray-500 dark:text-slate-400">
+                      {request.justification.length > 40 ? `${request.justification.substring(0, 40)}...` : request.justification}
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm text-gray-900 dark:text-slate-100">{request.requesterName}</span>
+                </TableCell>
+                <TableCell>
+                  <StatusBadge status={request.status} size="sm" />
+                </TableCell>
+                <TableCell>
+                  {request.teamLeadDecision ? (
+                    <StatusBadge status={request.teamLeadDecision} size="sm" />
+                  ) : (
+                    <span className="text-sm text-gray-400 italic">Pending</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {request.adminDecision ? (
+                    <StatusBadge status={request.adminDecision} size="sm" />
+                  ) : (
+                    <span className="text-sm text-gray-400 italic">Pending</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  <span className="text-sm text-gray-900 dark:text-slate-100">
+                    {new Date(request.requestedAt).toLocaleDateString()}
+                  </span>
+                </TableCell>
+                <TableCell className="text-right">
+                  <ActionMenu
+                    actions={getActionItems(request)}
+                    align="right"
+                    size="sm"
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
-        {visibleRequests.length === 0 && (
+        {filteredRequests.length === 0 && (
           <div className="text-center py-12">
             <div className="text-gray-400 text-xl mb-2">📋</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No requests found</h3>
-            <p className="text-gray-500">Create your first equipment request to get started</p>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-slate-100 mb-2">No requests found</h3>
+            <p className="text-gray-500 dark:text-slate-400">Try adjusting your search or filter criteria</p>
           </div>
         )}
       </div>
